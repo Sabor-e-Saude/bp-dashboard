@@ -223,14 +223,12 @@
     <button class="tab-btn navbar-tab active" data-tab="ocupacao">Ocupação</button>
     <button class="tab-btn navbar-tab" id="tab-btn-custos" data-tab="custos" style="display:none;">Custos</button>
   </div>
-  <div class="navbar-actions" id="sidebar-toolbar" style="display:none;">
-    <button class="sidebar-toolbar-btn" id="btn-abrir-filtros">🔍 Filtros</button>
-    <button class="sidebar-toolbar-btn" id="btn-abrir-versoes">📁 Versões <span class="badge" id="badge-versoes">0</span></button>
-    <button class="sidebar-toolbar-btn" id="btn-abrir-exportar">⬇️ Exportar</button>
-    <button class="sidebar-toolbar-btn" id="btn-abrir-capacidades">📏 Capacidades</button>
+  <div class="navbar-actions">
+    <button class="sidebar-toolbar-btn" id="btn-abrir-upload">📤 Upload</button>
   </div>
 </nav>
 <div class="container">
+  <div id="upload-home" style="display:none;">
   <details class="info-toggle" style="margin-bottom:1rem;"><summary></summary>
     <div class="info-panel">Solte o arquivo do BP27 (Localidade × Canal) e o arquivo de cubagem (CUBAGEM.xlsx) abaixo. Tudo roda no seu navegador — nada é enviado ou armazenado em servidor.</div>
   </details>
@@ -252,6 +250,7 @@
       <input type="file" id="input-custos" accept=".xlsx" />
     </div>
   </div>
+  </div>
 
   <input type="file" id="input-flow-substituir" accept=".xlsx,.xlsb" style="display:none;" />
 
@@ -268,8 +267,12 @@
 
   <div id="results">
     <div class="layout">
-      <div id="sidebar-home" style="display:none;">
       <aside class="sidebar">
+        <div class="sidebar-toolbar" id="sidebar-toolbar" style="display:none;">
+          <button class="sidebar-toolbar-btn" id="btn-abrir-versoes">📁 Versões <span class="badge" id="badge-versoes">0</span></button>
+          <button class="sidebar-toolbar-btn" id="btn-abrir-exportar">⬇️ Exportar</button>
+          <button class="sidebar-toolbar-btn" id="btn-abrir-capacidades">📏 Capacidades</button>
+        </div>
         <h3>Localidade (CD)</h3>
         <div class="chk-fixed" id="grupo-localidade">
           <label class="chk-item"><input type="checkbox" checked data-value="Extrema"> <span>Extrema (MG)</span></label>
@@ -329,7 +332,6 @@
         <h3>Família <button class="sel-todos-btn" data-target="familia">todos/nenhum</button></h3>
         <div class="chk-list" id="grupo-familia"></div>
       </aside>
-      </div>
 
       <div class="main">
         <div id="painel-ocupacao" class="tab-panel active">
@@ -869,18 +871,18 @@
     }).join('');
   }
 
-  function garantirSidebarEmCasa(){
-    // se o modal de filtros estiver aberto (sidebar dentro dele), devolve ela pro esconderijo
-    // antes de qualquer outro modal sobrescrever o conteúdo da caixa.
-    const asideEl = document.querySelector('#modal-filtros-slot .sidebar');
-    if(asideEl){
-      asideEl.style.cssText = '';
-      document.getElementById('sidebar-home').appendChild(asideEl);
+  function devolverConteudosMovidos(){
+    // se o upload estiver dentro do modal, devolve ele pro esconderijo antes de qualquer
+    // outro modal sobrescrever o conteúdo da caixa.
+    const uploadSlot = document.querySelector('#modal-upload-slot');
+    if(uploadSlot){
+      const uploadHome = document.getElementById('upload-home');
+      while(uploadSlot.firstChild) uploadHome.appendChild(uploadSlot.firstChild);
     }
   }
 
   function abrirModalVersoes(){
-    garantirSidebarEmCasa();
+    devolverConteudosMovidos();
     const box = document.getElementById('modal-box');
     box.style.maxWidth = '';
     box.dataset.tipo = 'versoes';
@@ -891,7 +893,7 @@
   }
 
   function abrirModalExportar(){
-    garantirSidebarEmCasa();
+    devolverConteudosMovidos();
     const box = document.getElementById('modal-box');
     box.style.maxWidth = '';
     box.dataset.tipo = 'exportar';
@@ -907,7 +909,7 @@
   }
 
   function abrirModalCapacidades(){
-    garantirSidebarEmCasa();
+    devolverConteudosMovidos();
     const box = document.getElementById('modal-box');
     box.style.maxWidth = '';
     box.dataset.tipo = 'capacidades';
@@ -919,26 +921,25 @@
     document.getElementById('modal-overlay').classList.add('aberto');
   }
 
-  function abrirModalFiltros(){
-    garantirSidebarEmCasa();
+  function abrirModalUpload(){
+    devolverConteudosMovidos();
     const box = document.getElementById('modal-box');
-    box.dataset.tipo = 'filtros';
-    box.style.maxWidth = '480px';
-    box.innerHTML = '<button class="modal-close-btn" onclick="window.__fecharModal()">&times;</button><h3>Filtros</h3><div id="modal-filtros-slot"></div>';
-    const slot = document.getElementById('modal-filtros-slot');
-    const asideEl = document.querySelector('#sidebar-home .sidebar');
-    slot.appendChild(asideEl); // move o elemento real da sidebar pra dentro do modal (preserva todos os listeners)
-    asideEl.style.cssText = 'width:100%; position:static; max-height:none; box-shadow:none; border:none; padding:0;';
+    box.dataset.tipo = 'upload';
+    box.style.maxWidth = '760px';
+    box.innerHTML = '<button class="modal-close-btn" onclick="window.__fecharModal()">&times;</button><h3>Upload de arquivos</h3><div id="modal-upload-slot"></div>';
+    const slot = document.getElementById('modal-upload-slot');
+    const uploadHome = document.getElementById('upload-home');
+    while(uploadHome.firstChild) slot.appendChild(uploadHome.firstChild);
     document.getElementById('modal-overlay').classList.add('aberto');
   }
 
   function fecharModal(){
-    garantirSidebarEmCasa();
+    devolverConteudosMovidos();
     document.getElementById('modal-overlay').classList.remove('aberto');
   }
   window.__fecharModal = fecharModal;
 
-  document.getElementById('btn-abrir-filtros').addEventListener('click', abrirModalFiltros);
+  document.getElementById('btn-abrir-upload').addEventListener('click', abrirModalUpload);
   document.getElementById('btn-abrir-versoes').addEventListener('click', abrirModalVersoes);
   document.getElementById('btn-abrir-exportar').addEventListener('click', abrirModalExportar);
   document.getElementById('btn-abrir-capacidades').addEventListener('click', abrirModalCapacidades);
