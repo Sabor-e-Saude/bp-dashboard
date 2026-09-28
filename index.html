@@ -143,6 +143,18 @@
   .tab-panel.active{display:block;}
   .subtab-custos-panel{display:none;}
   .subtab-custos-panel.active{display:block;}
+  .subtab-dre-panel{display:none;}
+  .subtab-dre-panel.active{display:block;}
+
+  .dre-table{font-size:12px;}
+  .dre-table th, .dre-table td{white-space:nowrap;}
+  .dre-cat-row td{background:var(--bg); font-weight:700; text-transform:uppercase; font-size:10.5px; letter-spacing:0.02em; color:var(--text2);}
+  .dre-total-row td{background:#eef3f8; font-weight:700; border-top:2px solid var(--border);}
+  .dre-linha-nome{padding-left:18px !important; font-weight:400 !important; text-transform:none !important; letter-spacing:0 !important; color:var(--text) !important;}
+  .dre-seta{display:inline-block; width:14px; text-align:center;}
+  .dre-up{color:#0f6e56; font-weight:700;}
+  .dre-down{color:#c0392b; font-weight:700;}
+  .dre-neutro{color:var(--muted); font-weight:700;}
 
   .card-secao{
     background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
@@ -222,6 +234,7 @@
   <div class="navbar-tabs">
     <button class="tab-btn navbar-tab active" data-tab="ocupacao">Ocupação</button>
     <button class="tab-btn navbar-tab" id="tab-btn-custos" data-tab="custos" style="display:none;">Custos</button>
+    <button class="tab-btn navbar-tab" id="tab-btn-dre" data-tab="dre" style="display:none;">DRE</button>
   </div>
   <div class="navbar-actions">
     <button class="sidebar-toolbar-btn" id="btn-abrir-upload">📤 Upload</button>
@@ -642,6 +655,43 @@
             </div>
           </div>
         </div>
+
+        <div id="painel-dre" class="tab-panel">
+          <details class="info-toggle" style="margin-bottom:1rem; display:block;"><summary></summary>
+            <div class="info-panel">
+              DRE comparativo entre duas versões do BP27, por CD. Cada célula mostra a variação (Δ = versão B − versão A) daquele mês, com ▲ verde quando o custo caiu e ▼ vermelho quando subiu. Respeita os filtros de Canal/Blocado/PD/Família e o Período ativos na barra lateral.
+            </div>
+          </details>
+
+          <div class="tabs-bar" style="margin-bottom:1.25rem;">
+            <button class="tab-btn subtab-btn active" data-subtab-dre="Extrema">Extrema (MG)</button>
+            <button class="tab-btn subtab-btn" data-subtab-dre="Navegantes">Navegantes (SC)</button>
+          </div>
+
+          <div id="dre-cd-Extrema" class="subtab-dre-panel active">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:1rem; flex-wrap:wrap;">
+              <label style="font-size:13px; color:var(--text2);">Versão A:</label>
+              <select id="select-dre-a-Extrema" style="font-size:13px; padding:5px 8px; border-radius:var(--radius); border:1px solid var(--border);"></select>
+              <label style="font-size:13px; color:var(--text2);">Versão B:</label>
+              <select id="select-dre-b-Extrema" style="font-size:13px; padding:5px 8px; border-radius:var(--radius); border:1px solid var(--border);"></select>
+              <button class="btn-copiar-tabela" style="margin-left:auto;" onclick="window.__copiarTabela('tabela-dre-Extrema', this)">Copiar tabela</button>
+            </div>
+            <div class="secao-nota">Δ (B − A) por mês; coluna Total soma o período selecionado. ▲ verde = custo caiu de A para B · ▼ vermelho = custo subiu · ➖ = sem variação relevante (&lt; R$ 0,01).</div>
+            <div style="overflow-x:auto;"><table id="tabela-dre-Extrema" class="dre-table"><thead></thead><tbody></tbody></table></div>
+          </div>
+
+          <div id="dre-cd-Navegantes" class="subtab-dre-panel">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:1rem; flex-wrap:wrap;">
+              <label style="font-size:13px; color:var(--text2);">Versão A:</label>
+              <select id="select-dre-a-Navegantes" style="font-size:13px; padding:5px 8px; border-radius:var(--radius); border:1px solid var(--border);"></select>
+              <label style="font-size:13px; color:var(--text2);">Versão B:</label>
+              <select id="select-dre-b-Navegantes" style="font-size:13px; padding:5px 8px; border-radius:var(--radius); border:1px solid var(--border);"></select>
+              <button class="btn-copiar-tabela" style="margin-left:auto;" onclick="window.__copiarTabela('tabela-dre-Navegantes', this)">Copiar tabela</button>
+            </div>
+            <div class="secao-nota">Δ (B − A) por mês; coluna Total soma o período selecionado. ▲ verde = custo caiu de A para B · ▼ vermelho = custo subiu · ➖ = sem variação relevante (&lt; R$ 0,01).</div>
+            <div style="overflow-x:auto;"><table id="tabela-dre-Navegantes" class="dre-table"><thead></thead><tbody></tbody></table></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -739,6 +789,13 @@
     btn.classList.add('active');
     document.querySelectorAll('.subtab-custos-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('custos-cd-' + btn.dataset.subtabCustos).classList.add('active');
+  }));
+
+  document.querySelectorAll('.subtab-btn[data-subtab-dre]').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.subtab-btn[data-subtab-dre]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.subtab-dre-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('dre-cd-' + btn.dataset.subtabDre).classList.add('active');
   }));
 
   document.querySelectorAll('.metric-btn').forEach(b => b.addEventListener('click', () => {
@@ -2751,8 +2808,10 @@
 
   function renderCustos(){
     const tabBtnCustos = document.getElementById('tab-btn-custos');
+    const tabBtnDre = document.getElementById('tab-btn-dre');
     if(!custosParsed || !detalhadoGlobal){
       tabBtnCustos.style.display = 'none';
+      if(tabBtnDre) tabBtnDre.style.display = 'none';
       ['Extrema','Navegantes'].forEach(loc => {
         const secaoComp = document.getElementById('secao-comparativo-custos-' + loc);
         if(secaoComp) secaoComp.style.display = 'none';
@@ -2760,7 +2819,9 @@
       return;
     }
     tabBtnCustos.style.display = 'inline-block';
+    if(tabBtnDre) tabBtnDre.style.display = versoesFlow.length >= 2 ? 'inline-block' : 'none';
     renderComparativoCustosVersoes();
+    renderDRE();
 
     const {linhasCusto, precos} = computeCustos();
     renderDiagPrecos(precos);
@@ -3125,6 +3186,146 @@
             '<td style="font-weight:600; color:' + corDelta + ';">' + (l.delta >= 0 ? '+' : '') + formatR$(l.delta) + '</td></tr>';
         }).join('')
       : '<tr><td colspan="6">Nenhuma cobrança mudou de valor entre as duas versões, no período selecionado.</td></tr>';
+  }
+
+  // ------------------------------------------------------------------
+  // DRE comparativo — aba própria, por CD, agrupado por categoria
+  // (Armazenagem/Movimentação/Taxas/Eventos), com Δ mês a mês entre
+  // duas versões do BP27 e seta de variação (▲ custo caiu / ▼ subiu).
+  // ------------------------------------------------------------------
+  const ORDEM_CATEGORIAS_DRE = ['Armazenagem','Movimentação','Taxas','Eventos'];
+  let dreVersaoIdx = {
+    Extrema: {a: -1, b: -1},
+    Navegantes: {a: -1, b: -1}
+  };
+
+  function preencherSelectsDRE(loc){
+    const selA = document.getElementById('select-dre-a-' + loc);
+    const selB = document.getElementById('select-dre-b-' + loc);
+    if(!selA || !selB) return;
+    const idx = dreVersaoIdx[loc];
+    if(idx.a < 0 || idx.a >= versoesFlow.length) idx.a = versoesFlow.length - 2;
+    if(idx.b < 0 || idx.b >= versoesFlow.length) idx.b = versoesFlow.length - 1;
+    const opcoes = versoesFlow.map((v, i) => '<option value="' + i + '">' + v.nome + '</option>').join('');
+    selA.innerHTML = opcoes;
+    selB.innerHTML = opcoes;
+    selA.value = idx.a;
+    selB.value = idx.b;
+    if(!selA.dataset.wired){
+      selA.dataset.wired = '1';
+      selA.addEventListener('change', () => { idx.a = Number(selA.value); renderDRE(loc); });
+      selB.addEventListener('change', () => { idx.b = Number(selB.value); renderDRE(loc); });
+    }
+  }
+
+  // ícone + cor: aqui Δ<0 é custo caindo (bom) → seta verde pra cima;
+  // Δ>0 é custo subindo (ruim) → seta vermelha pra baixo.
+  function seloVariacaoDRE(delta){
+    if(Math.abs(delta) < 0.01) return '<span class="dre-seta dre-neutro">➖</span>';
+    return delta < 0 ? '<span class="dre-seta dre-up">▲</span>' : '<span class="dre-seta dre-down">▼</span>';
+  }
+  function celulaDeltaDRE(delta){
+    const cor = Math.abs(delta) < 0.01 ? 'dre-neutro' : (delta < 0 ? 'dre-up' : 'dre-down');
+    return '<td class="' + cor + '">' + seloVariacaoDRE(delta) + ' ' + formatR$(Math.abs(delta)) + '</td>';
+  }
+
+  function renderDRE(locAlvo){
+    const locs = locAlvo ? [locAlvo] : ['Extrema','Navegantes'];
+    locs.forEach(loc => {
+      const table = document.getElementById('tabela-dre-' + loc);
+      if(!table) return;
+      const thead = table.querySelector('thead');
+      const tbody = table.querySelector('tbody');
+      if(versoesFlow.length < 2 || !custosParsed){
+        thead.innerHTML = '';
+        tbody.innerHTML = '<tr><td>Carregue pelo menos duas versões do BP27 pra comparar o DRE.</td></tr>';
+        return;
+      }
+      preencherSelectsDRE(loc);
+
+      const idx = dreVersaoIdx[loc];
+      const versaoA = versoesFlow[idx.a];
+      const versaoB = versoesFlow[idx.b];
+      const detA = computeDetalheCompleto(loc, versaoA.fontes);
+      const detB = computeDetalheCompleto(loc, versaoB.fontes);
+      const resA = computeCustos(versaoA.fontes);
+      const resB = computeCustos(versaoB.fontes);
+      const mesesPeriodo = mesesDoPeriodo();
+
+      // chave única por linha: id + canal (a mesma cobrança pode existir 1x por canal)
+      function chave(l){ return (l.id || l.nome) + '|' + (l.categoriaCanal || '—'); }
+      const mapaA = {}; detA.forEach(l => { mapaA[chave(l)] = l; });
+      const mapaB = {}; detB.forEach(l => { mapaB[chave(l)] = l; });
+      const todasChaves = new Set([...Object.keys(mapaA), ...Object.keys(mapaB)]);
+
+      // agrupa por categoria, mantendo cada linha com seu array mensal de Δ
+      const grupos = {};
+      todasChaves.forEach(k => {
+        const a = mapaA[k], b = mapaB[k];
+        const base = a || b;
+        const categoria = base.categoriaLinha || '(sem categoria)';
+        const deltasPorMes = Array(12).fill(0);
+        for(let m = 0; m < 12; m++){
+          deltasPorMes[m] = (b ? b.valoresPorMes[m] : 0) - (a ? a.valoresPorMes[m] : 0);
+        }
+        if(!grupos[categoria]) grupos[categoria] = {linhas: [], subtotal: Array(12).fill(0)};
+        grupos[categoria].linhas.push({nome: base.nome, canal: base.categoriaCanal, deltasPorMes});
+        for(let m = 0; m < 12; m++) grupos[categoria].subtotal[m] += deltasPorMes[m];
+      });
+
+      // ajuste de Faturamento Mínimo (só entra se ele realmente pesou em algum mês, em A ou B)
+      let temAjusteMinimo = false;
+      const ajusteMinimoPorMes = Array(12).fill(0);
+      if(resA && resB){
+        const linhasA = resA.linhasCusto.filter(l => l.loc === loc);
+        const linhasB = resB.linhasCusto.filter(l => l.loc === loc);
+        for(let m = 0; m < 12; m++){
+          const ajA = (linhasA.find(l => l.mes === m) || {});
+          const ajB = (linhasB.find(l => l.mes === m) || {});
+          const vA = (ajA.totalCobrado || 0) - (ajA.totalVariavel || 0);
+          const vB = (ajB.totalCobrado || 0) - (ajB.totalVariavel || 0);
+          if(Math.abs(vA) > 0.01 || Math.abs(vB) > 0.01) temAjusteMinimo = true;
+          ajusteMinimoPorMes[m] = vB - vA;
+        }
+      }
+
+      // monta o HTML: categorias na ordem fixa primeiro, depois qualquer outra que apareça
+      const nomesCategorias = ORDEM_CATEGORIAS_DRE.filter(c => grupos[c]).concat(Object.keys(grupos).filter(c => !ORDEM_CATEGORIAS_DRE.includes(c)));
+      const totalGeralPorMes = Array(12).fill(0);
+      let linhasHtml = '';
+      nomesCategorias.forEach(cat => {
+        const g = grupos[cat];
+        for(let m = 0; m < 12; m++) totalGeralPorMes[m] += g.subtotal[m];
+        const celulasSub = [];
+        let totalSubPeriodo = 0;
+        for(let m = periodoDe; m <= periodoAte; m++){ celulasSub.push(celulaDeltaDRE(g.subtotal[m])); totalSubPeriodo += g.subtotal[m]; }
+        linhasHtml += '<tr class="dre-cat-row"><td>' + cat + '</td>' + celulasSub.join('') + celulaDeltaDRE(totalSubPeriodo) + '</tr>';
+
+        g.linhas.sort((x,y) => Math.abs(y.deltasPorMes.reduce((s,v)=>s+v,0)) - Math.abs(x.deltasPorMes.reduce((s,v)=>s+v,0)));
+        g.linhas.forEach(l => {
+          const celulas = [];
+          let totalLinha = 0;
+          for(let m = periodoDe; m <= periodoAte; m++){ celulas.push(celulaDeltaDRE(l.deltasPorMes[m])); totalLinha += l.deltasPorMes[m]; }
+          linhasHtml += '<tr><td class="dre-linha-nome">' + l.nome + (l.canal ? ' <span style="color:var(--muted); font-weight:400;">(' + l.canal + ')</span>' : '') + '</td>' + celulas.join('') + celulaDeltaDRE(totalLinha) + '</tr>';
+        });
+      });
+
+      if(temAjusteMinimo){
+        for(let m = 0; m < 12; m++) totalGeralPorMes[m] += ajusteMinimoPorMes[m];
+        const celulasAj = [];
+        let totalAjPeriodo = 0;
+        for(let m = periodoDe; m <= periodoAte; m++){ celulasAj.push(celulaDeltaDRE(ajusteMinimoPorMes[m])); totalAjPeriodo += ajusteMinimoPorMes[m]; }
+        linhasHtml += '<tr class="dre-cat-row"><td>Ajuste Faturamento Mínimo</td>' + celulasAj.join('') + celulaDeltaDRE(totalAjPeriodo) + '</tr>';
+      }
+
+      const celulasTotal = [];
+      let totalGeralPeriodo = 0;
+      for(let m = periodoDe; m <= periodoAte; m++){ celulasTotal.push(celulaDeltaDRE(totalGeralPorMes[m])); totalGeralPeriodo += totalGeralPorMes[m]; }
+      linhasHtml += '<tr class="dre-total-row"><td>TOTAL COBRADO</td>' + celulasTotal.join('') + celulaDeltaDRE(totalGeralPeriodo) + '</tr>';
+
+      thead.innerHTML = '<tr><th>' + versaoA.nome + ' → ' + versaoB.nome + '</th>' + mesesPeriodo.map(m => '<th>' + m + '</th>').join('') + '<th>Total</th></tr>';
+      tbody.innerHTML = linhasHtml;
+    });
   }
 
   function renderComparativoDetalhe(detPenultima, detUltima, nomePenultima, nomeUltima){
