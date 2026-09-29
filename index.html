@@ -3632,16 +3632,19 @@
     const nBlocos = nMeses + 1; // +1 = bloco "Total do período"
     // cada bloco (por mês, e o total) sai como 5 colunas reais: V.A | % | V.B | % | Δ
     const rotuloBloco = ['V.' + versaoA.nome, '%', 'V.' + versaoB.nome, '%', 'Δ (B − A)'];
-    const headerTopo = ['Descrição'];
-    const headerSub = [''];
+    // coluna de Nível: filtro de hierarquia — 1=Categoria (ex.: Armazenagem),
+    // 2=Canal (ex.: Peças), 3=Cobrança/linha de custo (ex.: Bloco), 4=item de causa física (drill-down).
+    const headerTopo = ['Nível', 'Descrição'];
+    const headerSub = ['', ''];
     mesesPeriodo.forEach(m => { headerTopo.push(m, '', '', '', ''); headerSub.push(...rotuloBloco); });
     headerTopo.push('Total do período', '', '', '', '');
     headerSub.push(...rotuloBloco);
     ws.addRow(headerTopo);
     ws.addRow(headerSub);
     ws.mergeCells(1, 1, 2, 1);
+    ws.mergeCells(1, 2, 2, 2);
     for(let b = 0; b < nBlocos; b++){
-      const c0 = 2 + b * 5;
+      const c0 = 3 + b * 5;
       ws.mergeCells(1, c0, 1, c0 + 4);
     }
     [ws.getRow(1), ws.getRow(2)].forEach(row => {
@@ -3651,7 +3654,9 @@
         cell.alignment = {vertical: 'middle', horizontal: 'center'};
       });
     });
-    ws.views = [{state: 'frozen', xSplit: 1, ySplit: 2}];
+    ws.views = [{state: 'frozen', xSplit: 2, ySplit: 2}];
+    // ativa o AutoFiltro na coluna de Nível pra permitir filtrar por 1/2/3/4 direto no Excel
+    ws.autoFilter = {from: {row: 2, column: 1}, to: {row: 2, column: 2 + nBlocos * 5}};
 
     function corDelta(delta){
       if(Math.abs(delta) < 0.01) return COR_DRE_CINZA;
@@ -3662,18 +3667,20 @@
       return [valorA, pctA, valorB, pctB, valorB - valorA];
     }
     function aplicarLinha(descricao, blocos, indent, opts){
-      const valores = [descricao];
+      const nivel = indent + 1; // indent 0=Categoria, 1=Canal, 2=Cobrança, 3=causa física → Nível 1..4
+      const valores = [nivel, descricao];
       blocos.forEach(b => valores.push(...b));
       const row = ws.addRow(valores);
       row.eachCell((cell, colNum) => {
         if(opts.fillHex) cell.fill = {type: 'pattern', pattern: 'solid', fgColor: {argb: opts.fillHex}};
         if(opts.bold) cell.font = Object.assign({bold: true}, cell.font || {});
         if(opts.italic) cell.font = Object.assign({italic: true}, cell.font || {});
-        if(colNum === 1) cell.alignment = {indent: indent};
+        if(colNum === 1) cell.alignment = {horizontal: 'center'};
+        if(colNum === 2) cell.alignment = {indent: indent};
       });
-      // formata cada bloco: colunas 2..6 do bloco 0, 7..11 do bloco 1, etc (na planilha, 1-based)
+      // formata cada bloco: colunas 3..7 do bloco 0, 8..12 do bloco 1, etc (na planilha, 1-based)
       for(let b = 0; b < blocos.length; b++){
-        const c0 = 2 + b * 5;
+        const c0 = 3 + b * 5;
         const cellA = row.getCell(c0), cellPctA = row.getCell(c0 + 1), cellB = row.getCell(c0 + 2), cellPctB = row.getCell(c0 + 3), cellDelta = row.getCell(c0 + 4);
         cellA.numFmt = '#,##0'; cellB.numFmt = '#,##0'; cellDelta.numFmt = '#,##0';
         cellPctA.numFmt = '0.0%'; cellPctB.numFmt = '0.0%';
@@ -3752,8 +3759,9 @@
     blocosTotal.push(blocoValoresExp(tga, tgb, 1, 1));
     aplicarLinha('TOTAL COBRADO', blocosTotal, 0, {fillHex: COR_DRE_TOTAL, bold: true});
 
-    ws.getColumn(1).width = 42;
-    for(let i = 2; i <= 1 + nBlocos * 5; i++) ws.getColumn(i).width = 13;
+    ws.getColumn(1).width = 8;
+    ws.getColumn(2).width = 42;
+    for(let i = 3; i <= 2 + nBlocos * 5; i++) ws.getColumn(i).width = 13;
 
     const buffer = await wb.xlsx.writeBuffer();
     const blob = new Blob([buffer], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
