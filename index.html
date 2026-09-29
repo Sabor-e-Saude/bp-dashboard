@@ -1988,6 +1988,16 @@
   let detalhadoGlobal = null;
   let detalhadoEntradaGlobal = null, detalhadoVendaGlobal = null;
   const filtros = {localidade:['Extrema','Navegantes'], canal:['Loja','E.Comm','Peças'], blocado:['SIM','NÃO'], producao:[], pd:[], familia:[]};
+  // mapeia a categoria de canal (rótulo livre de um serviço/evento manual) pro filtro
+  // real de canal da sidebar; categorias sem correspondência real (ex: sem categoria)
+  // sempre aparecem. Usada tanto no detalhe por categoria (DRE/resumo) quanto no
+  // cálculo do total variável/mínimo (computeCustos) — as duas precisam bater.
+  function categoriaCanalPassaFiltro(categoriaCanal){
+    if(categoriaCanal === 'E.Comm') return filtros.canal.includes('E.Comm');
+    if(categoriaCanal === 'Peças') return filtros.canal.includes('Peças');
+    if(categoriaCanal === 'Lojas' || categoriaCanal === 'HA') return filtros.canal.includes('Loja');
+    return true;
+  }
   let pdFamiliaMap = {};
   let periodoDe = 0, periodoAte = 11;
   let picoDecendioTipo = 'ESTFINAL_DEC';
@@ -2616,12 +2626,13 @@
         }
 
         const custoOutrasTotal = servicos.reduce((soma, serv) => {
+          if(!categoriaCanalPassaFiltro(serv.categoriaCanal)) return soma;
           const precoServico = aplicarReajustes(loc, 'servico:' + serv.id, serv.valorUnitario, m);
           const quantidade = calcularQuantidadeServico(serv, m, loc, volumes);
           return soma + quantidade * precoServico;
         }, 0);
 
-        const custoEventos = (eventosManuais[loc] || []).filter(ev => ev.mes === m).reduce((s, ev) => s + ev.valor, 0);
+        const custoEventos = (eventosManuais[loc] || []).filter(ev => ev.mes === m && categoriaCanalPassaFiltro(ev.categoriaCanal)).reduce((s, ev) => s + ev.valor, 0);
         const totalVariavel = custoPP + custoBloco + custoRecebimento + custoExpedicaoB2B + custoExpedicaoB2C + custoExpedicao + custoAdValorem + custoGris + custoTransferencia + custoOutrasTotal + custoEventos;
         const totalCobrado = (loc === 'Extrema' && p.minimo) ? Math.max(totalVariavel, p.minimo) : totalVariavel;
         linhasCusto.push({loc, mes:m, custoPP, custoBloco, custoRecebimento, custoExpedicaoB2B, custoExpedicaoB2C, custoExpedicao, custoAdValorem, custoGris, custoTransferencia, custoOutras: custoOutrasTotal, custoEventos, totalVariavel, totalCobrado});
@@ -2696,15 +2707,6 @@
       linhas.push({id:'gris', nome:'GRIS', categoriaLinha:'Taxas', categoriaCanal:nomeCanalDisplay[canal], valoresPorMes: valoresParaCanal('gris', p.gris || 0, dGlobal.linhas, 'valorEstoque', canal)});
     });
     linhas.push({id:'transferencia', nome:'Transferência E.Comm', categoriaLinha:'Movimentação', categoriaCanal:'E.Comm', valoresPorMes: valoresPara('transferencia', PRECO_TRANSFERENCIA_ECOMM, transfM3PorLoc[loc])});
-
-    function categoriaCanalPassaFiltro(categoriaCanal){
-      // mapeia a categoria de canal (rótulo livre) pro filtro real de canal da sidebar;
-      // categorias sem correspondência real (ex: sem categoria) sempre aparecem.
-      if(categoriaCanal === 'E.Comm') return filtros.canal.includes('E.Comm');
-      if(categoriaCanal === 'Peças') return filtros.canal.includes('Peças');
-      if(categoriaCanal === 'Lojas' || categoriaCanal === 'HA') return filtros.canal.includes('Loja');
-      return true;
-    }
 
     (servicosManuais[loc] || []).forEach(serv => {
       if(!categoriaCanalPassaFiltro(serv.categoriaCanal)) return;
