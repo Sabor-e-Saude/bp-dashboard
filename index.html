@@ -3308,6 +3308,18 @@
     return map[field] || '';
   }
   function formatQtdDRE(v){ return (v || 0).toLocaleString('pt-BR', {maximumFractionDigits: 1}); }
+  // mesmo bloco de 5 colunas do blocoDRE, mas pra volume físico (não R$) —
+  // usado nas linhas de causa física, mês a mês por versão.
+  function blocoFisicoDRE(valorA, valorB, unidade){
+    const delta = valorB - valorA;
+    const cor = Math.abs(delta) < 0.01 ? 'dre-neutro' : (delta < 0 ? 'dre-up' : 'dre-down');
+    const suf = unidade ? (' ' + unidade) : '';
+    return '<td>' + formatQtdDRE(valorA) + suf + '</td>' +
+      '<td></td>' +
+      '<td>' + formatQtdDRE(valorB) + suf + '</td>' +
+      '<td></td>' +
+      '<td class="' + cor + '">' + seloVariacaoDRE(delta) + ' ' + formatQtdDRE(Math.abs(delta)) + suf + '</td>';
+  }
 
   // qual métrica física (e filtro de canal/blocado) explica cada cobrança
   // calculada automaticamente — usado pro drill-down "onde está a causa física".
@@ -3395,13 +3407,15 @@
     const linhas = [];
     chaves.forEach(k => {
       let delta = 0, physA = 0, physB = 0;
+      const porMesA = [], porMesB = [];
       for(let m = periodoDe; m <= periodoAte; m++){
         const pA = (gA[k] || Array(12).fill(0))[m], pB = (gB[k] || Array(12).fill(0))[m];
         delta += (pB - pA) * precos[m];
         physA += pA; physB += pB;
+        porMesA.push(pA); porMesB.push(pB);
       }
       if(Math.abs(delta) < 0.01 && Math.abs(physB - physA) < 0.01) return;
-      linhas.push({chave: k, delta, physA, physB, deltaFisico: physB - physA, unidade});
+      linhas.push({chave: k, delta, physA, physB, deltaFisico: physB - physA, unidade, porMesA, porMesB});
     });
     linhas.sort((x, y) => Math.abs(y.delta) - Math.abs(x.delta));
     return linhas;
@@ -3533,10 +3547,11 @@
                 drill.forEach(d => {
                   const sinal = d.deltaFisico > 0 ? '+' : '';
                   const textoFisico = d.unidade
-                    ? '<div class="dre-sub">Volume: ' + formatQtdDRE(d.physA) + ' → ' + formatQtdDRE(d.physB) + ' ' + d.unidade + ' (' + sinal + formatQtdDRE(d.deltaFisico) + ' ' + d.unidade + ')</div>'
+                    ? '<div class="dre-sub">Volume no período: ' + formatQtdDRE(d.physA) + ' → ' + formatQtdDRE(d.physB) + ' ' + d.unidade + ' (' + sinal + formatQtdDRE(d.deltaFisico) + ' ' + d.unidade + ')</div>'
                     : '';
+                  const celulasMesDrill = d.porMesA.map((vA, i) => blocoFisicoDRE(vA, d.porMesB[i], d.unidade)).join('');
                   linhasHtml += '<tr class="dre-drill-row' + (oculta ? ' dre-oculto' : '') + '"><td class="dre-drill-nome">' + d.chave + textoFisico + '</td>' +
-                    celulasVaziasDRE(mesesPeriodo.length) +
+                    celulasMesDrill +
                     '<td></td><td></td><td></td><td></td><td class="' + (d.delta < 0 ? 'dre-up' : 'dre-down') + '">' + seloVariacaoDRE(d.delta) + ' ' + formatR$(Math.abs(d.delta)) + '</td></tr>';
                 });
               } else {
@@ -3730,13 +3745,15 @@
             const drill = drilldownFisicoDRE(loc, l.id, canalNome, versaoA, versaoB);
             if(drill && drill.length){
               drill.forEach(d => {
-                const blocosVazios = Array(nMeses).fill([null, null, null, null, null]);
-                blocosVazios.push([null, null, null, null, d.delta]);
+                // meses mostram o volume físico (não R$) por versão; o bloco Total
+                // segue mostrando o impacto em R$, que é o resumo já visto na descrição.
+                const blocosDrill = d.porMesA.map((vA, i) => [vA, null, d.porMesB[i], null, d.porMesB[i] - vA]);
+                blocosDrill.push([null, null, null, null, d.delta]);
                 const sinal = d.deltaFisico > 0 ? '+' : '';
                 const descricaoDrill = d.unidade
-                  ? d.chave + '  (volume: ' + formatQtdDRE(d.physA) + ' → ' + formatQtdDRE(d.physB) + ' ' + d.unidade + ', ' + sinal + formatQtdDRE(d.deltaFisico) + ' ' + d.unidade + ')'
+                  ? d.chave + '  (volume no período: ' + formatQtdDRE(d.physA) + ' → ' + formatQtdDRE(d.physB) + ' ' + d.unidade + ', ' + sinal + formatQtdDRE(d.deltaFisico) + ' ' + d.unidade + ')'
                   : d.chave;
-                aplicarLinha(descricaoDrill, blocosVazios, 3, {italic: true});
+                aplicarLinha(descricaoDrill, blocosDrill, 3, {italic: true});
               });
             }
           }
