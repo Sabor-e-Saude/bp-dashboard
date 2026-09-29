@@ -157,6 +157,8 @@
   .dre-drill-nome{padding-left:52px !important; font-style:italic; color:var(--text2); font-size:11px;}
   .dre-oculto{display:none !important;}
   .dre-toggle{display:inline-block; width:12px; cursor:pointer; user-select:none;}
+  .dre-toggle-drill{display:inline-block; width:auto; font-size:10.5px; font-weight:600; color:#3a6ea5; background:#eaf1fa; border-radius:3px; padding:1px 6px; margin-top:2px;}
+  .dre-toggle-drill:hover{background:#d9e7f5;}
   .dre-seta{display:inline-block; width:14px; text-align:center;}
   .dre-up{color:#0f6e56; font-weight:700;}
   .dre-down{color:#c0392b; font-weight:700;}
@@ -3285,18 +3287,27 @@
     if(v === null || v === undefined || !isFinite(v)) return '—';
     return (v * 100).toLocaleString('pt-BR', {maximumFractionDigits:1}) + '%';
   }
-  // célula "Total": Δ + seta, e embaixo, menor, o V(A)→V(B) e a %participação (A→B)
-  function celulaTotalDRE(valorA, valorB, pctA, pctB){
+  // bloco de 5 colunas (V.A | % | V.B | % | Δ), usado tanto por mês quanto pro
+  // total do período — uma única função pras duas situações evita o tipo de bug
+  // de % duplicado/errado que já aconteceu quando isso vivia em dois lugares.
+  function blocoDRE(valorA, valorB, pctA, pctB){
     const delta = valorB - valorA;
     const cor = Math.abs(delta) < 0.01 ? 'dre-neutro' : (delta < 0 ? 'dre-up' : 'dre-down');
-    return '<td class="' + cor + '">' + seloVariacaoDRE(delta) + ' ' + formatR$(Math.abs(delta)) +
-      '<div class="dre-sub">' + formatR$(valorA) + ' → ' + formatR$(valorB) + '</div>' +
-      '<div class="dre-sub">' + formatPctDRE(pctA) + ' → ' + formatPctDRE(pctB) + '</div></td>';
+    return '<td>' + formatR$(valorA) + '</td>' +
+      '<td class="dre-sub">' + formatPctDRE(pctA) + '</td>' +
+      '<td>' + formatR$(valorB) + '</td>' +
+      '<td class="dre-sub">' + formatPctDRE(pctB) + '</td>' +
+      '<td class="' + cor + '">' + seloVariacaoDRE(delta) + ' ' + formatR$(Math.abs(delta)) + '</td>';
   }
-  function celulaMesDRE(delta){
-    const cor = Math.abs(delta) < 0.01 ? 'dre-neutro' : (delta < 0 ? 'dre-up' : 'dre-down');
-    return '<td class="' + cor + '">' + seloVariacaoDRE(delta) + ' ' + formatR$(Math.abs(delta)) + '</td>';
+  const CELULAS_POR_BLOCO_DRE = 5;
+  function celulasVaziasDRE(nBlocos){ return Array(nBlocos * CELULAS_POR_BLOCO_DRE).fill('<td></td>').join(''); }
+  // rótulo de unidade física de cada base de cálculo, pra mostrar o volume
+  // (não só o R$) no drill-down — é isso que estava faltando aparecer.
+  function unidadeDoBasis(field){
+    const map = {m3: 'm³', m2: 'm²', pp: 'plt', estoque: 'un', valorEstoque: 'R$ estoque', transfM3: 'm³ transf.'};
+    return map[field] || '';
   }
+  function formatQtdDRE(v){ return (v || 0).toLocaleString('pt-BR', {maximumFractionDigits: 1}); }
 
   // qual métrica física (e filtro de canal/blocado) explica cada cobrança
   // calculada automaticamente — usado pro drill-down "onde está a causa física".
@@ -3356,7 +3367,8 @@
   }
 
   // decompõe o Δ (em R$, já somado no período selecionado) daquela cobrança
-  // por PD + Família — cada grupo aparece com sua fatia exata do Δ total.
+  // por PD + Família — cada grupo aparece com sua fatia exata do Δ total,
+  // e também com o volume físico (quantidade + unidade) que gerou essa fatia.
   function drilldownFisicoDRE(loc, id, canalDisplay, versaoA, versaoB){
     const basis = basisDaLinhaDRE(loc, id, canalDisplay);
     if(!basis) return null;
@@ -3364,6 +3376,7 @@
     const dA = computeDetalhado(versaoA.fontes, cubResultadoGlobal, operacaoBasis);
     const dB = computeDetalhado(versaoB.fontes, cubResultadoGlobal, operacaoBasis);
     const precos = precoPorMesDaLinhaDRE(loc, id);
+    const unidade = unidadeDoBasis(basis.field);
 
     function agrupar(linhas){
       const g = {};
@@ -3381,13 +3394,14 @@
     const chaves = new Set([...Object.keys(gA), ...Object.keys(gB)]);
     const linhas = [];
     chaves.forEach(k => {
-      let delta = 0;
+      let delta = 0, physA = 0, physB = 0;
       for(let m = periodoDe; m <= periodoAte; m++){
-        const physA = (gA[k] || Array(12).fill(0))[m], physB = (gB[k] || Array(12).fill(0))[m];
-        delta += (physB - physA) * precos[m];
+        const pA = (gA[k] || Array(12).fill(0))[m], pB = (gB[k] || Array(12).fill(0))[m];
+        delta += (pB - pA) * precos[m];
+        physA += pA; physB += pB;
       }
-      if(Math.abs(delta) < 0.01) return;
-      linhas.push({chave: k, delta});
+      if(Math.abs(delta) < 0.01 && Math.abs(physB - physA) < 0.01) return;
+      linhas.push({chave: k, delta, physA, physB, deltaFisico: physB - physA, unidade});
     });
     linhas.sort((x, y) => Math.abs(y.delta) - Math.abs(x.delta));
     return linhas;
@@ -3479,9 +3493,9 @@
         const catTotalA = totalPeriodo(g.totalA), catTotalB = totalPeriodo(g.totalB);
 
         const celulasMesCat = [];
-        for(let m = periodoDe; m <= periodoAte; m++) celulasMesCat.push(celulaMesDRE(g.totalB[m] - g.totalA[m]));
+        for(let m = periodoDe; m <= periodoAte; m++) celulasMesCat.push(blocoDRE(g.totalA[m], g.totalB[m], divSeguro(g.totalA[m], totalGeralA[m]), divSeguro(g.totalB[m], totalGeralB[m])));
         linhasHtml += '<tr class="dre-cat-row"><td><span class="dre-toggle" onclick="window.__toggleDreGrupo(\'' + loc + '\',\'' + catId + '\')">' + (catColapsada ? '▸' : '▾') + '</span> ' + cat + '</td>' +
-          celulasMesCat.join('') + celulaTotalDRE(catTotalA, catTotalB, divSeguro(catTotalA, totalGeralPeriodoA), divSeguro(catTotalB, totalGeralPeriodoB)) + '</tr>';
+          celulasMesCat.join('') + blocoDRE(catTotalA, catTotalB, divSeguro(catTotalA, totalGeralPeriodoA), divSeguro(catTotalB, totalGeralPeriodoB)) + '</tr>';
 
         const nomesCanais = Object.keys(g.canais).sort((x, y) => Math.abs(totalPeriodo(g.canais[y].totalB) - totalPeriodo(g.canais[y].totalA)) - Math.abs(totalPeriodo(g.canais[x].totalB) - totalPeriodo(g.canais[x].totalA)));
         nomesCanais.forEach((canalNome, canIdx) => {
@@ -3492,37 +3506,41 @@
           const canTotalA = totalPeriodo(c.totalA), canTotalB = totalPeriodo(c.totalB);
           const pctCanA = divSeguro(canTotalA, catTotalA), pctCanB = divSeguro(canTotalB, catTotalB);
           const celulasMesCan = [];
-          for(let m = periodoDe; m <= periodoAte; m++) celulasMesCan.push(celulaMesDRE(c.totalB[m] - c.totalA[m]));
+          for(let m = periodoDe; m <= periodoAte; m++) celulasMesCan.push(blocoDRE(c.totalA[m], c.totalB[m], divSeguro(c.totalA[m], g.totalA[m]), divSeguro(c.totalB[m], g.totalB[m])));
           linhasHtml += '<tr class="dre-canal-row' + (catColapsada ? ' dre-oculto' : '') + '"><td><span class="dre-toggle" onclick="window.__toggleDreGrupo(\'' + loc + '\',\'' + canId + '\')">' + (canColapsada ? '▸' : '▾') + '</span> ' + canalNome + '</td>' +
-            celulasMesCan.join('') + celulaTotalDRE(canTotalA, canTotalB, pctCanA, pctCanB) + '</tr>';
+            celulasMesCan.join('') + blocoDRE(canTotalA, canTotalB, pctCanA, pctCanB) + '</tr>';
 
           c.linhas.sort((x, y) => Math.abs(totalPeriodo(y.valoresB) - totalPeriodo(y.valoresA)) - Math.abs(totalPeriodo(x.valoresB) - totalPeriodo(x.valoresA)));
           c.linhas.forEach(l => {
             const linTotalA = totalPeriodo(l.valoresA), linTotalB = totalPeriodo(l.valoresB);
             const pctLinA = divSeguro(linTotalA, canTotalA), pctLinB = divSeguro(linTotalB, canTotalB);
             const celulasMesLin = [];
-            for(let m = periodoDe; m <= periodoAte; m++) celulasMesLin.push(celulaMesDRE(l.valoresB[m] - l.valoresA[m]));
+            for(let m = periodoDe; m <= periodoAte; m++) celulasMesLin.push(blocoDRE(l.valoresA[m], l.valoresB[m], divSeguro(l.valoresA[m], c.totalA[m]), divSeguro(l.valoresB[m], c.totalB[m])));
             const oculta = catColapsada || canColapsada;
             const basis = basisDaLinhaDRE(loc, l.id, canalNome);
             const lineKey = catId + '|lin|' + canIdx + '|' + l.id;
             const temDrill = basis && Math.abs(linTotalB - linTotalA) >= 0.01;
             const drillAberto = dreDrillAbertos[loc].has(lineKey);
             const toggleDrill = temDrill
-              ? '<span class="dre-toggle" title="Ver a causa física (PD/Família)" onclick="window.__toggleDreDrilldown(\'' + loc + '\',\'' + lineKey + '\')">' + (drillAberto ? '▾' : '▸') + '</span> '
-              : '<span style="display:inline-block; width:14px;"></span> ';
-            linhasHtml += '<tr class="dre-linha-row' + (oculta ? ' dre-oculto' : '') + '"><td class="dre-linha-nome">' + toggleDrill + l.nome + '</td>' +
-              celulasMesLin.join('') + celulaTotalDRE(linTotalA, linTotalB, pctLinA, pctLinB) + '</tr>';
+              ? '<span class="dre-toggle dre-toggle-drill" title="Ver a causa física (PD/Família) — clique pra expandir" onclick="window.__toggleDreDrilldown(\'' + loc + '\',\'' + lineKey + '\')">' + (drillAberto ? '▾ causa física' : '▸ causa física') + '</span> '
+              : '';
+            linhasHtml += '<tr class="dre-linha-row' + (oculta ? ' dre-oculto' : '') + '"><td class="dre-linha-nome">' + l.nome + (temDrill ? '<br>' + toggleDrill : '') + '</td>' +
+              celulasMesLin.join('') + blocoDRE(linTotalA, linTotalB, pctLinA, pctLinB) + '</tr>';
 
             if(temDrill && drillAberto){
               const drill = drilldownFisicoDRE(loc, l.id, canalNome, versaoA, versaoB);
               if(drill && drill.length){
                 drill.forEach(d => {
-                  linhasHtml += '<tr class="dre-drill-row' + (oculta ? ' dre-oculto' : '') + '"><td class="dre-drill-nome">' + d.chave + '</td>' +
-                    Array(mesesPeriodo.length).fill('<td></td>').join('') +
-                    '<td class="' + (d.delta < 0 ? 'dre-up' : 'dre-down') + '">' + seloVariacaoDRE(d.delta) + ' ' + formatR$(Math.abs(d.delta)) + '</td></tr>';
+                  const sinal = d.deltaFisico > 0 ? '+' : '';
+                  const textoFisico = d.unidade
+                    ? '<div class="dre-sub">Volume: ' + formatQtdDRE(d.physA) + ' → ' + formatQtdDRE(d.physB) + ' ' + d.unidade + ' (' + sinal + formatQtdDRE(d.deltaFisico) + ' ' + d.unidade + ')</div>'
+                    : '';
+                  linhasHtml += '<tr class="dre-drill-row' + (oculta ? ' dre-oculto' : '') + '"><td class="dre-drill-nome">' + d.chave + textoFisico + '</td>' +
+                    celulasVaziasDRE(mesesPeriodo.length) +
+                    '<td></td><td></td><td></td><td></td><td class="' + (d.delta < 0 ? 'dre-up' : 'dre-down') + '">' + seloVariacaoDRE(d.delta) + ' ' + formatR$(Math.abs(d.delta)) + '</td></tr>';
                 });
               } else {
-                linhasHtml += '<tr class="dre-drill-row' + (oculta ? ' dre-oculto' : '') + '"><td class="dre-drill-nome">Nenhum PD/Família com variação relevante nesse período.</td>' + Array(mesesPeriodo.length + 1).fill('<td></td>').join('') + '</tr>';
+                linhasHtml += '<tr class="dre-drill-row' + (oculta ? ' dre-oculto' : '') + '"><td class="dre-drill-nome">Nenhum PD/Família com variação relevante nesse período.</td>' + celulasVaziasDRE(mesesPeriodo.length + 1) + '</tr>';
               }
             }
           });
@@ -3532,16 +3550,20 @@
       if(temAjusteMinimo){
         for(let m = 0; m < 12; m++){ totalGeralA[m] += ajusteA[m]; totalGeralB[m] += ajusteB[m]; }
         const celulasAj = [];
-        for(let m = periodoDe; m <= periodoAte; m++) celulasAj.push(celulaMesDRE(ajusteB[m] - ajusteA[m]));
-        linhasHtml += '<tr class="dre-cat-row"><td>Ajuste Faturamento Mínimo</td>' + celulasAj.join('') + celulaTotalDRE(totalPeriodo(ajusteA), totalPeriodo(ajusteB), null, null) + '</tr>';
+        for(let m = periodoDe; m <= periodoAte; m++) celulasAj.push(blocoDRE(ajusteA[m], ajusteB[m], null, null));
+        linhasHtml += '<tr class="dre-cat-row"><td>Ajuste Faturamento Mínimo</td>' + celulasAj.join('') + blocoDRE(totalPeriodo(ajusteA), totalPeriodo(ajusteB), null, null) + '</tr>';
       }
 
       const celulasTotal = [];
-      for(let m = periodoDe; m <= periodoAte; m++) celulasTotal.push(celulaMesDRE(totalGeralB[m] - totalGeralA[m]));
-      linhasHtml += '<tr class="dre-total-row"><td>TOTAL COBRADO</td>' + celulasTotal.join('') + celulaTotalDRE(totalPeriodo(totalGeralA), totalPeriodo(totalGeralB), 1, 1) + '</tr>';
+      for(let m = periodoDe; m <= periodoAte; m++) celulasTotal.push(blocoDRE(totalGeralA[m], totalGeralB[m], 1, 1));
+      linhasHtml += '<tr class="dre-total-row"><td>TOTAL COBRADO</td>' + celulasTotal.join('') + blocoDRE(totalPeriodo(totalGeralA), totalPeriodo(totalGeralB), 1, 1) + '</tr>';
 
       dreGruposConhecidos[loc] = gruposConhecidos;
-      thead.innerHTML = '<tr><th>' + versaoA.nome + ' → ' + versaoB.nome + '</th>' + mesesPeriodo.map(m => '<th>' + m + '</th>').join('') + '<th>Total do período (V.A → V.B · % part.)</th></tr>';
+      const subHeaderBloco = '<th>V.' + versaoA.nome + '</th><th>%</th><th>V.' + versaoB.nome + '</th><th>%</th><th>Δ</th>';
+      thead.innerHTML = '<tr><th rowspan="2">' + versaoA.nome + ' → ' + versaoB.nome + '</th>' +
+          mesesPeriodo.map(m => '<th colspan="5">' + m + '</th>').join('') +
+          '<th colspan="5">Total do período</th></tr>' +
+        '<tr>' + mesesPeriodo.map(() => subHeaderBloco).join('') + subHeaderBloco + '</tr>';
       tbody.innerHTML = linhasHtml;
     });
   }
@@ -3606,21 +3628,42 @@
 
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('DRE ' + loc);
-    const headerCols = ['Descrição'].concat(mesesPeriodo).concat(['V.' + versaoA.nome, 'V.' + versaoB.nome, 'Δ (B − A)', '% ' + versaoA.nome, '% ' + versaoB.nome]);
-    ws.addRow(headerCols);
-    const headerRow = ws.getRow(1);
-    headerRow.eachCell(cell => {
-      cell.font = {bold: true, color: {argb: 'FFFFFFFF'}};
-      cell.fill = {type: 'pattern', pattern: 'solid', fgColor: {argb: 'FF00B0F0'}};
-      cell.alignment = {vertical: 'middle', horizontal: 'center'};
+    const nMeses = mesesPeriodo.length;
+    const nBlocos = nMeses + 1; // +1 = bloco "Total do período"
+    // cada bloco (por mês, e o total) sai como 5 colunas reais: V.A | % | V.B | % | Δ
+    const rotuloBloco = ['V.' + versaoA.nome, '%', 'V.' + versaoB.nome, '%', 'Δ (B − A)'];
+    const headerTopo = ['Descrição'];
+    const headerSub = [''];
+    mesesPeriodo.forEach(m => { headerTopo.push(m, '', '', '', ''); headerSub.push(...rotuloBloco); });
+    headerTopo.push('Total do período', '', '', '', '');
+    headerSub.push(...rotuloBloco);
+    ws.addRow(headerTopo);
+    ws.addRow(headerSub);
+    ws.mergeCells(1, 1, 2, 1);
+    for(let b = 0; b < nBlocos; b++){
+      const c0 = 2 + b * 5;
+      ws.mergeCells(1, c0, 1, c0 + 4);
+    }
+    [ws.getRow(1), ws.getRow(2)].forEach(row => {
+      row.eachCell(cell => {
+        cell.font = {bold: true, color: {argb: 'FFFFFFFF'}};
+        cell.fill = {type: 'pattern', pattern: 'solid', fgColor: {argb: 'FF00B0F0'}};
+        cell.alignment = {vertical: 'middle', horizontal: 'center'};
+      });
     });
-    ws.views = [{state: 'frozen', ySplit: 1}];
+    ws.views = [{state: 'frozen', xSplit: 1, ySplit: 2}];
 
     function corDelta(delta){
       if(Math.abs(delta) < 0.01) return COR_DRE_CINZA;
       return delta < 0 ? COR_DRE_VERDE : COR_DRE_VERMELHO;
     }
-    function aplicarLinha(valores, indent, opts){
+    // monta os 5 valores (V.A, %A, V.B, %B, Δ) de UM bloco (mês ou total)
+    function blocoValoresExp(valorA, valorB, pctA, pctB){
+      return [valorA, pctA, valorB, pctB, valorB - valorA];
+    }
+    function aplicarLinha(descricao, blocos, indent, opts){
+      const valores = [descricao];
+      blocos.forEach(b => valores.push(...b));
       const row = ws.addRow(valores);
       row.eachCell((cell, colNum) => {
         if(opts.fillHex) cell.fill = {type: 'pattern', pattern: 'solid', fgColor: {argb: opts.fillHex}};
@@ -3628,64 +3671,65 @@
         if(opts.italic) cell.font = Object.assign({italic: true}, cell.font || {});
         if(colNum === 1) cell.alignment = {indent: indent};
       });
+      // formata cada bloco: colunas 2..6 do bloco 0, 7..11 do bloco 1, etc (na planilha, 1-based)
+      for(let b = 0; b < blocos.length; b++){
+        const c0 = 2 + b * 5;
+        const cellA = row.getCell(c0), cellPctA = row.getCell(c0 + 1), cellB = row.getCell(c0 + 2), cellPctB = row.getCell(c0 + 3), cellDelta = row.getCell(c0 + 4);
+        cellA.numFmt = '#,##0'; cellB.numFmt = '#,##0'; cellDelta.numFmt = '#,##0';
+        cellPctA.numFmt = '0.0%'; cellPctB.numFmt = '0.0%';
+        const vDelta = Number(cellDelta.value) || 0;
+        cellDelta.font = Object.assign({}, cellDelta.font || {}, {color: {argb: corDelta(vDelta)}, bold: true});
+      }
       return row;
-    }
-    function preencherCoresDelta(row, deltaColIdxs){
-      deltaColIdxs.forEach(colIdx => {
-        const cell = row.getCell(colIdx);
-        const v = Number(cell.value) || 0;
-        cell.font = Object.assign({}, cell.font || {}, {color: {argb: corDelta(v)}, bold: true});
-        cell.numFmt = '#,##0';
-      });
     }
 
     const nomesCategorias = ORDEM_CATEGORIAS_DRE.filter(c => grupos[c]).concat(Object.keys(grupos).filter(c => !ORDEM_CATEGORIAS_DRE.includes(c)));
-    const nMeses = mesesPeriodo.length;
-    const colTotalA = 2 + nMeses, colTotalB = 3 + nMeses, colDelta = 4 + nMeses, colPctA = 5 + nMeses, colPctB = 6 + nMeses;
-    const deltaColsMensais = []; for(let i = 0; i < nMeses; i++) deltaColsMensais.push(2 + i);
 
     // pré-passo: total geral (todas categorias) ANTES de montar as linhas,
     // pra % de cada categoria ser sobre o total real, não sobre ela mesma.
-    const totalGeralPeriodoAExp = nomesCategorias.reduce((s, cat) => s + totalPeriodo(grupos[cat].totalA), 0);
-    const totalGeralPeriodoBExp = nomesCategorias.reduce((s, cat) => s + totalPeriodo(grupos[cat].totalB), 0);
+    const totalGeralArrA = Array(12).fill(0), totalGeralArrB = Array(12).fill(0);
+    nomesCategorias.forEach(cat => { for(let m = 0; m < 12; m++){ totalGeralArrA[m] += grupos[cat].totalA[m]; totalGeralArrB[m] += grupos[cat].totalB[m]; } });
+    const totalGeralPeriodoAExp = totalPeriodo(totalGeralArrA), totalGeralPeriodoBExp = totalPeriodo(totalGeralArrB);
+
+    // monta os blocos mês-a-mês + total de um nível, dado seus arrays A/B e os arrays A/B do "pai" (pra %)
+    function blocosDoNivel(arrA, arrB, paiArrA, paiArrB){
+      const blocos = [];
+      for(let m = periodoDe; m <= periodoAte; m++) blocos.push(blocoValoresExp(arrA[m], arrB[m], divSeguro(arrA[m], paiArrA[m]), divSeguro(arrB[m], paiArrB[m])));
+      return blocos;
+    }
 
     nomesCategorias.forEach(cat => {
       const g = grupos[cat];
       const catTotalA = totalPeriodo(g.totalA), catTotalB = totalPeriodo(g.totalB);
-      const valoresLinha = [cat];
-      for(let m = periodoDe; m <= periodoAte; m++) valoresLinha.push(g.totalB[m] - g.totalA[m]);
-      valoresLinha.push(catTotalA, catTotalB, catTotalB - catTotalA, divSeguro(catTotalA, totalGeralPeriodoAExp), divSeguro(catTotalB, totalGeralPeriodoBExp));
-      const row = aplicarLinha(valoresLinha, 0, {fillHex: COR_DRE_CAT, bold: true});
-      preencherCoresDelta(row, deltaColsMensais.concat([colDelta]));
-      row.getCell(colPctA).numFmt = '0.0%'; row.getCell(colPctB).numFmt = '0.0%';
+      const blocosCat = blocosDoNivel(g.totalA, g.totalB, totalGeralArrA, totalGeralArrB);
+      blocosCat.push(blocoValoresExp(catTotalA, catTotalB, divSeguro(catTotalA, totalGeralPeriodoAExp), divSeguro(catTotalB, totalGeralPeriodoBExp)));
+      aplicarLinha(cat, blocosCat, 0, {fillHex: COR_DRE_CAT, bold: true});
 
       Object.keys(g.canais).forEach(canalNome => {
         const c = g.canais[canalNome];
         const canTotalA = totalPeriodo(c.totalA), canTotalB = totalPeriodo(c.totalB);
-        const valoresCan = [canalNome];
-        for(let m = periodoDe; m <= periodoAte; m++) valoresCan.push(c.totalB[m] - c.totalA[m]);
-        valoresCan.push(canTotalA, canTotalB, canTotalB - canTotalA, divSeguro(canTotalA, catTotalA), divSeguro(canTotalB, catTotalB));
-        const rowCan = aplicarLinha(valoresCan, 1, {fillHex: COR_DRE_CAN, italic: true});
-        preencherCoresDelta(rowCan, deltaColsMensais.concat([colDelta]));
-        rowCan.getCell(colPctA).numFmt = '0.0%'; rowCan.getCell(colPctB).numFmt = '0.0%';
+        const blocosCan = blocosDoNivel(c.totalA, c.totalB, g.totalA, g.totalB);
+        blocosCan.push(blocoValoresExp(canTotalA, canTotalB, divSeguro(canTotalA, catTotalA), divSeguro(canTotalB, catTotalB)));
+        aplicarLinha(canalNome, blocosCan, 1, {fillHex: COR_DRE_CAN, italic: true});
 
         c.linhas.forEach(l => {
           const linTotalA = totalPeriodo(l.valoresA), linTotalB = totalPeriodo(l.valoresB);
-          const valoresLin = [l.nome];
-          for(let m = periodoDe; m <= periodoAte; m++) valoresLin.push(l.valoresB[m] - l.valoresA[m]);
-          valoresLin.push(linTotalA, linTotalB, linTotalB - linTotalA, divSeguro(linTotalA, canTotalA), divSeguro(linTotalB, canTotalB));
-          const rowLin = aplicarLinha(valoresLin, 2, {});
-          preencherCoresDelta(rowLin, deltaColsMensais.concat([colDelta]));
-          rowLin.getCell(colPctA).numFmt = '0.0%'; rowLin.getCell(colPctB).numFmt = '0.0%';
+          const blocosLin = blocosDoNivel(l.valoresA, l.valoresB, c.totalA, c.totalB);
+          blocosLin.push(blocoValoresExp(linTotalA, linTotalB, divSeguro(linTotalA, canTotalA), divSeguro(linTotalB, canTotalB)));
+          aplicarLinha(l.nome, blocosLin, 2, {});
 
           const basis = basisDaLinhaDRE(loc, l.id, canalNome);
           if(basis && Math.abs(linTotalB - linTotalA) >= 0.01){
             const drill = drilldownFisicoDRE(loc, l.id, canalNome, versaoA, versaoB);
             if(drill && drill.length){
               drill.forEach(d => {
-                const valoresDrill = [d.chave].concat(Array(nMeses).fill(null)).concat([null, null, d.delta, null, null]);
-                const rowDrill = aplicarLinha(valoresDrill, 3, {italic: true});
-                preencherCoresDelta(rowDrill, [colDelta]);
+                const blocosVazios = Array(nMeses).fill([null, null, null, null, null]);
+                blocosVazios.push([null, null, null, null, d.delta]);
+                const sinal = d.deltaFisico > 0 ? '+' : '';
+                const descricaoDrill = d.unidade
+                  ? d.chave + '  (volume: ' + formatQtdDRE(d.physA) + ' → ' + formatQtdDRE(d.physB) + ' ' + d.unidade + ', ' + sinal + formatQtdDRE(d.deltaFisico) + ' ' + d.unidade + ')'
+                  : d.chave;
+                aplicarLinha(descricaoDrill, blocosVazios, 3, {italic: true});
               });
             }
           }
@@ -3694,27 +3738,22 @@
     });
 
     if(temAjusteMinimo){
-      const valoresAj = ['Ajuste Faturamento Mínimo'];
-      for(let m = periodoDe; m <= periodoAte; m++) valoresAj.push(ajusteB[m] - ajusteA[m]);
+      const blocosAj = blocosDoNivel(ajusteA, ajusteB, totalGeralArrA, totalGeralArrB).map(b => [b[0], null, b[2], null, b[4]]);
       const ajA = totalPeriodo(ajusteA), ajB = totalPeriodo(ajusteB);
-      valoresAj.push(ajA, ajB, ajB - ajA, null, null);
-      const rowAj = aplicarLinha(valoresAj, 0, {fillHex: COR_DRE_CAT, bold: true});
-      preencherCoresDelta(rowAj, deltaColsMensais.concat([colDelta]));
+      blocosAj.push([ajA, null, ajB, null, ajB - ajA]);
+      aplicarLinha('Ajuste Faturamento Mínimo', blocosAj, 0, {fillHex: COR_DRE_CAT, bold: true});
     }
 
-    const totalGeralA = Array(12).fill(0), totalGeralB = Array(12).fill(0);
-    nomesCategorias.forEach(cat => { for(let m = 0; m < 12; m++){ totalGeralA[m] += grupos[cat].totalA[m]; totalGeralB[m] += grupos[cat].totalB[m]; } });
+    const totalGeralA = totalGeralArrA.slice(), totalGeralB = totalGeralArrB.slice();
     if(temAjusteMinimo) for(let m = 0; m < 12; m++){ totalGeralA[m] += ajusteA[m]; totalGeralB[m] += ajusteB[m]; }
     const tga = totalPeriodo(totalGeralA), tgb = totalPeriodo(totalGeralB);
-    const valoresTotal = ['TOTAL COBRADO'];
-    for(let m = periodoDe; m <= periodoAte; m++) valoresTotal.push(totalGeralB[m] - totalGeralA[m]);
-    valoresTotal.push(tga, tgb, tgb - tga, 1, 1);
-    const rowTotal = aplicarLinha(valoresTotal, 0, {fillHex: COR_DRE_TOTAL, bold: true});
-    preencherCoresDelta(rowTotal, deltaColsMensais.concat([colDelta]));
-    rowTotal.getCell(colPctA).numFmt = '0.0%'; rowTotal.getCell(colPctB).numFmt = '0.0%';
+    const blocosTotal = [];
+    for(let m = periodoDe; m <= periodoAte; m++) blocosTotal.push(blocoValoresExp(totalGeralA[m], totalGeralB[m], 1, 1));
+    blocosTotal.push(blocoValoresExp(tga, tgb, 1, 1));
+    aplicarLinha('TOTAL COBRADO', blocosTotal, 0, {fillHex: COR_DRE_TOTAL, bold: true});
 
     ws.getColumn(1).width = 42;
-    for(let i = 2; i <= colPctB; i++) ws.getColumn(i).width = 13;
+    for(let i = 2; i <= 1 + nBlocos * 5; i++) ws.getColumn(i).width = 13;
 
     const buffer = await wb.xlsx.writeBuffer();
     const blob = new Blob([buffer], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
