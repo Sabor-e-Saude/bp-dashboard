@@ -1102,13 +1102,26 @@
   function seedServicosManuaisDoArquivo(){
     ['Extrema','Navegantes'].forEach(loc => {
       if(!custosParsed[loc]) return;
-      const existentesPorNome = {};
-      (servicosManuais[loc] || []).forEach(s => { existentesPorNome[s.nome] = s; });
+      // fila por nome, não um único "last wins" — o Custos_CDs pode ter VÁRIAS linhas
+      // com o mesmo nome de serviço (ex.: "Analista Administrativo SR" 1º e 2º turno,
+      // cargos diferentes ao mesmo preço etc.). Com um dicionário simples, todo mundo
+      // com esse nome casava com "o último que apareceu" e acabava com o MESMO id —
+      // colidindo depois na DRE (uma das linhas sumia da tela, mas continuava contando
+      // no total). Aqui cada entrada do arquivo consome a próxima da fila daquele nome,
+      // na ordem em que já existiam, preservando a config de cada uma individualmente.
+      const filaPorNome = {};
+      (servicosManuais[loc] || []).forEach(s => {
+        if(!filaPorNome[s.nome]) filaPorNome[s.nome] = [];
+        filaPorNome[s.nome].push(s);
+      });
+      const usadosDoExistente = new Set();
 
       const doArquivo = custosParsed[loc].outros || [];
       const novaLista = doArquivo.map((serv, idx) => {
-        const existente = existentesPorNome[serv.nome];
+        const fila = filaPorNome[serv.nome];
+        const existente = fila && fila.length ? fila.shift() : null;
         if(existente){
+          usadosDoExistente.add(existente);
           // já existia (preenchido antes) — mantém tudo que o usuário configurou,
           // só atualiza preço/unidade caso o arquivo novo tenha valores diferentes
           const merged = {...existente, valorUnitario: serv.valorUnitario, unidade: serv.unidade};
@@ -1130,9 +1143,9 @@
         };
       });
 
-      // preserva também os serviços que o usuário adicionou manualmente (não vêm do arquivo)
-      const nomesDoArquivo = new Set(doArquivo.map(s => s.nome));
-      const manuaisForaDoArquivo = (servicosManuais[loc] || []).filter(s => !nomesDoArquivo.has(s.nome));
+      // preserva também os serviços que o usuário adicionou manualmente (não foram
+      // consumidos da fila acima — nem por nome nem por "sobra" de nomes duplicados)
+      const manuaisForaDoArquivo = (servicosManuais[loc] || []).filter(s => !usadosDoExistente.has(s));
 
       servicosManuais[loc] = novaLista.concat(manuaisForaDoArquivo);
     });
@@ -2708,7 +2721,15 @@
     });
     linhas.push({id:'transferencia', nome:'Transferência E.Comm', categoriaLinha:'Movimentação', categoriaCanal:'E.Comm', valoresPorMes: valoresPara('transferencia', PRECO_TRANSFERENCIA_ECOMM, transfM3PorLoc[loc])});
 
-    (servicosManuais[loc] || []).forEach(serv => {
+    // idxServ vai num campo à parte (chaveExtra), NÃO no "id" — o "id" continua
+    // 'servico:'+serv.id puro porque badgeReajuste()/aplicarReajustes() dependem desse
+    // formato exato pra casar com as regras de reajuste. chaveExtra existe só pra DRE
+    // desempatar a chave() quando duas cobranças manuais acabam com o mesmo serv.id
+    // (ex.: nomes duplicados no Custos_CDs, tipo "Analista Administrativo SR" 1º/2º
+    // turno, que colidem no merge do upload) — sem isso, uma das duas linhas some
+    // silenciosamente da DRE (fica de fora da soma de categoria, mas continua entrando
+    // no total variável usado pra bater com o mínimo — foi exatamente esse o bug).
+    (servicosManuais[loc] || []).forEach((serv, idxServ) => {
       if(!categoriaCanalPassaFiltro(serv.categoriaCanal)) return;
       const valoresPorMes = [];
       for(let m = 0; m < 12; m++){
@@ -2716,14 +2737,17 @@
         const quantidade = calcularQuantidadeServico(serv, m, loc, volumes);
         valoresPorMes.push(quantidade * precoServico);
       }
-      linhas.push({id:'servico:' + serv.id, nome: serv.nome, categoriaLinha: serv.categoriaLinha || '(sem categoria)', categoriaCanal: serv.categoriaCanal || '—', valoresPorMes});
+      linhas.push({id:'servico:' + serv.id, chaveExtra: idxServ, nome: serv.nome, categoriaLinha: serv.categoriaLinha || '(sem categoria)', categoriaCanal: serv.categoriaCanal || '—', valoresPorMes});
     });
 
-    (eventosManuais[loc] || []).forEach(ev => {
+    // mesma lógica pros eventos: dois eventos com nome igual (ex.: "Midea Day" em meses
+    // diferentes) não tinham "id" nenhum antes — só o nome — e colidiam na chave() da
+    // DRE do mesmo jeito, fazendo um dos dois sumir da tela.
+    (eventosManuais[loc] || []).forEach((ev, idxEv) => {
       if(!categoriaCanalPassaFiltro(ev.categoriaCanal)) return;
       const valoresPorMes = Array(12).fill(0);
       valoresPorMes[ev.mes] = ev.valor;
-      linhas.push({nome: ev.nome, categoriaLinha: 'Eventos', categoriaCanal: ev.categoriaCanal || '—', valoresPorMes});
+      linhas.push({chaveExtra: idxEv, nome: ev.nome, categoriaLinha: 'Eventos', categoriaCanal: ev.categoriaCanal || '—', valoresPorMes});
     });
 
     return linhas;
@@ -3223,7 +3247,7 @@
       return t;
     }
     // chave única por linha: id + canal (uma mesma cobrança pode aparecer 1x por canal)
-    function chave(l){ return (l.id || l.nome) + '|' + (l.categoriaCanal || '—'); }
+    function chave(l){ return (l.id || l.nome) + '|' + (l.categoriaCanal || '—') + (l.chaveExtra !== undefined ? '|' + l.chaveExtra : ''); }
 
     const mapaA = {};
     detA.forEach(l => { mapaA[chave(l)] = {nome: l.nome, canal: l.categoriaCanal, categoria: l.categoriaLinha, total: totalPeriodo(l)}; });
@@ -3549,7 +3573,7 @@
       }
 
       // chave única por linha: id + canal (a mesma cobrança pode existir 1x por canal)
-      function chave(l){ return (l.id || l.nome) + '|' + (l.categoriaCanal || '—'); }
+      function chave(l){ return (l.id || l.nome) + '|' + (l.categoriaCanal || '—') + (l.chaveExtra !== undefined ? '|' + l.chaveExtra : ''); }
       const mapasPorVersao = detsPorVersao.map(det => { const m = {}; det.forEach(l => { m[chave(l)] = l; }); return m; });
       const todasChaves = new Set();
       mapasPorVersao.forEach(m => Object.keys(m).forEach(k => todasChaves.add(k)));
@@ -3770,7 +3794,7 @@
 
     function totalPeriodo(valoresPorMes){ let t = 0; for(let m = periodoDe; m <= periodoAte; m++) t += valoresPorMes[m]; return t; }
     function divSeguro(num, den){ return (den > 0.005 || den < -0.005) ? num / den : null; }
-    function chave(l){ return (l.id || l.nome) + '|' + (l.categoriaCanal || '—'); }
+    function chave(l){ return (l.id || l.nome) + '|' + (l.categoriaCanal || '—') + (l.chaveExtra !== undefined ? '|' + l.chaveExtra : ''); }
     const mapasPorVersao = detsPorVersao.map(det => { const m = {}; det.forEach(l => { m[chave(l)] = l; }); return m; });
     const todasChaves = new Set();
     mapasPorVersao.forEach(m => Object.keys(m).forEach(k => todasChaves.add(k)));
