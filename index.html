@@ -459,7 +459,7 @@
             <div class="info-panel">
               Simula 4 serviços calculados automaticamente: Armazenagem Porta Palete, Armazenagem Bloco (por m³), Recebimento (m³) e Expedição (m³), mais Ad-Valorem (via PMM da cubagem).
               O campo "Outras cobranças" em cada aba é pra somar manualmente o que não dá pra calcular sozinho (taxas por evento, mão de obra, seguros adicionais etc.).
-              Extrema aplica Faturamento Mínimo Mensal (R$ 1.800.000) como piso. Respeita os filtros de Canal/Blocado/PD/Família e o Período.
+              Extrema aplica Faturamento Mínimo Mensal (valor lido da linha "Faturamento mínimo mensal" na aba Extrema do arquivo de Custos_CDs carregado) como piso, fixo em todos os meses do ano (não é reajustado). Respeita os filtros de Canal/Blocado/PD/Família e o Período.
             </div>
           </details>
           <details class="info-toggle" style="margin-bottom:1rem; display:block;"><summary></summary>
@@ -688,64 +688,52 @@
 
           <div id="dre-cd-Extrema" class="subtab-dre-panel active">
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:1rem; flex-wrap:wrap;">
-              <label style="font-size:13px; color:var(--text2);">Versão A:</label>
-              <select id="select-dre-a-Extrema" style="font-size:13px; padding:5px 8px; border-radius:var(--radius); border:1px solid var(--border);"></select>
-              <label style="font-size:13px; color:var(--text2);">Versão B:</label>
-              <select id="select-dre-b-Extrema" style="font-size:13px; padding:5px 8px; border-radius:var(--radius); border:1px solid var(--border);"></select>
+              <span id="dre-versoes-lista-Extrema" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;"></span>
+              <button class="btn-copiar-tabela" id="dre-add-versao-Extrema" onclick="window.__dreAdicionarVersao('Extrema')">+ Adicionar versão</button>
               <button class="btn-copiar-tabela" onclick="window.__toggleDreTudo('Extrema', true)">Expandir tudo</button>
               <button class="btn-copiar-tabela" onclick="window.__toggleDreTudo('Extrema', false)">Colapsar tudo</button>
               <button class="btn-copiar-tabela" style="margin-left:auto;" onclick="window.__copiarTabela('tabela-dre-Extrema', this)">Copiar tabela</button>
               <button class="btn-copiar-tabela" onclick="window.__exportarDREExcel('Extrema')">📊 Exportar Excel formatado</button>
             </div>
-            <div style="display:flex; align-items:center; gap:8px; margin-bottom:1rem; flex-wrap:wrap; background:#fff8ea; border:1px solid #f0dca8; border-radius:var(--radius); padding:8px 10px;">
-              <span style="font-size:13px; color:var(--text2);">🔔 Alertar variação ≥</span>
-              <input type="number" id="dre-limiar-pct-Extrema" value="5" min="0" step="0.5" style="width:55px; font-size:13px; padding:4px 6px; border-radius:var(--radius); border:1px solid var(--border);">
-              <span style="font-size:13px; color:var(--text2);">%</span>
-              <span style="font-size:13px; color:var(--text2);">ou ≥ R$</span>
-              <input type="number" id="dre-limiar-rs-Extrema" value="10000" min="0" step="1000" style="width:85px; font-size:13px; padding:4px 6px; border-radius:var(--radius); border:1px solid var(--border);">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:1.25rem; flex-wrap:wrap; background:#fff8ea; border:1px solid #f0dca8; border-radius:var(--radius); padding:8px 10px;">
+              <span style="font-size:13px; color:var(--text2);">🔔 Alertar quando a variação for ≥</span>
+              <select id="dre-limiar-tipo-Extrema" style="font-size:13px; padding:4px 6px; border-radius:var(--radius); border:1px solid var(--border);">
+                <option value="pct">% (percentual)</option>
+                <option value="rs">R$ (valor absoluto)</option>
+              </select>
+              <input type="number" id="dre-limiar-valor-Extrema" value="5" min="0" step="0.5" style="width:95px; font-size:13px; padding:4px 6px; border-radius:var(--radius); border:1px solid var(--border);">
               <label style="font-size:13px; color:var(--text2); display:flex; align-items:center; gap:5px; margin-left:8px;"><input type="checkbox" id="dre-so-relevantes-Extrema"> Mostrar só as relevantes</label>
             </div>
-            <div style="margin-bottom:1.25rem;">
-              <div style="font-weight:600; font-size:13px; margin-bottom:6px; color:var(--text2);">📊 Waterfall: de V.A até V.B por categoria</div>
-              <div style="height:280px;"><canvas id="chart-waterfall-dre-Extrema"></canvas></div>
-            </div>
-            <div style="margin-bottom:1.25rem;">
+            <div style="overflow-x:auto;"><table id="tabela-dre-Extrema" class="dre-table"><thead></thead><tbody></tbody></table></div>
+            <div style="margin-top:1.25rem;">
               <div style="font-weight:600; font-size:13px; margin-bottom:6px; color:var(--text2);">🔎 Top drivers da variação (8 maiores)</div>
               <div id="dre-top-drivers-Extrema"></div>
             </div>
-            <div class="secao-nota">Δ (B − A) por mês; a coluna final soma o período selecionado (V.A → V.B) e mostra a % de participação dentro do grupo pai. ▲ verde = custo caiu de A para B · ▼ vermelho = custo subiu · ➖ = sem variação relevante (&lt; R$ 0,01). Linhas com ⚠️ passaram do limiar de alerta configurado acima. Clique em ▾/▸ pra colapsar Categoria/Canal, ou na seta ao lado de uma cobrança pra ver qual PD/Família causou aquela variação.</div>
-            <div style="overflow-x:auto;"><table id="tabela-dre-Extrema" class="dre-table"><thead></thead><tbody></tbody></table></div>
           </div>
 
           <div id="dre-cd-Navegantes" class="subtab-dre-panel">
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:1rem; flex-wrap:wrap;">
-              <label style="font-size:13px; color:var(--text2);">Versão A:</label>
-              <select id="select-dre-a-Navegantes" style="font-size:13px; padding:5px 8px; border-radius:var(--radius); border:1px solid var(--border);"></select>
-              <label style="font-size:13px; color:var(--text2);">Versão B:</label>
-              <select id="select-dre-b-Navegantes" style="font-size:13px; padding:5px 8px; border-radius:var(--radius); border:1px solid var(--border);"></select>
+              <span id="dre-versoes-lista-Navegantes" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;"></span>
+              <button class="btn-copiar-tabela" id="dre-add-versao-Navegantes" onclick="window.__dreAdicionarVersao('Navegantes')">+ Adicionar versão</button>
               <button class="btn-copiar-tabela" onclick="window.__toggleDreTudo('Navegantes', true)">Expandir tudo</button>
               <button class="btn-copiar-tabela" onclick="window.__toggleDreTudo('Navegantes', false)">Colapsar tudo</button>
               <button class="btn-copiar-tabela" style="margin-left:auto;" onclick="window.__copiarTabela('tabela-dre-Navegantes', this)">Copiar tabela</button>
               <button class="btn-copiar-tabela" onclick="window.__exportarDREExcel('Navegantes')">📊 Exportar Excel formatado</button>
             </div>
-            <div style="display:flex; align-items:center; gap:8px; margin-bottom:1rem; flex-wrap:wrap; background:#fff8ea; border:1px solid #f0dca8; border-radius:var(--radius); padding:8px 10px;">
-              <span style="font-size:13px; color:var(--text2);">🔔 Alertar variação ≥</span>
-              <input type="number" id="dre-limiar-pct-Navegantes" value="5" min="0" step="0.5" style="width:55px; font-size:13px; padding:4px 6px; border-radius:var(--radius); border:1px solid var(--border);">
-              <span style="font-size:13px; color:var(--text2);">%</span>
-              <span style="font-size:13px; color:var(--text2);">ou ≥ R$</span>
-              <input type="number" id="dre-limiar-rs-Navegantes" value="10000" min="0" step="1000" style="width:85px; font-size:13px; padding:4px 6px; border-radius:var(--radius); border:1px solid var(--border);">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:1.25rem; flex-wrap:wrap; background:#fff8ea; border:1px solid #f0dca8; border-radius:var(--radius); padding:8px 10px;">
+              <span style="font-size:13px; color:var(--text2);">🔔 Alertar quando a variação for ≥</span>
+              <select id="dre-limiar-tipo-Navegantes" style="font-size:13px; padding:4px 6px; border-radius:var(--radius); border:1px solid var(--border);">
+                <option value="pct">% (percentual)</option>
+                <option value="rs">R$ (valor absoluto)</option>
+              </select>
+              <input type="number" id="dre-limiar-valor-Navegantes" value="5" min="0" step="0.5" style="width:95px; font-size:13px; padding:4px 6px; border-radius:var(--radius); border:1px solid var(--border);">
               <label style="font-size:13px; color:var(--text2); display:flex; align-items:center; gap:5px; margin-left:8px;"><input type="checkbox" id="dre-so-relevantes-Navegantes"> Mostrar só as relevantes</label>
             </div>
-            <div style="margin-bottom:1.25rem;">
-              <div style="font-weight:600; font-size:13px; margin-bottom:6px; color:var(--text2);">📊 Waterfall: de V.A até V.B por categoria</div>
-              <div style="height:280px;"><canvas id="chart-waterfall-dre-Navegantes"></canvas></div>
-            </div>
-            <div style="margin-bottom:1.25rem;">
+            <div style="overflow-x:auto;"><table id="tabela-dre-Navegantes" class="dre-table"><thead></thead><tbody></tbody></table></div>
+            <div style="margin-top:1.25rem;">
               <div style="font-weight:600; font-size:13px; margin-bottom:6px; color:var(--text2);">🔎 Top drivers da variação (8 maiores)</div>
               <div id="dre-top-drivers-Navegantes"></div>
             </div>
-            <div class="secao-nota">Δ (B − A) por mês; a coluna final soma o período selecionado (V.A → V.B) e mostra a % de participação dentro do grupo pai. ▲ verde = custo caiu de A para B · ▼ vermelho = custo subiu · ➖ = sem variação relevante (&lt; R$ 0,01). Linhas com ⚠️ passaram do limiar de alerta configurado acima. Clique em ▾/▸ pra colapsar Categoria/Canal, ou na seta ao lado de uma cobrança pra ver qual PD/Família causou aquela variação.</div>
-            <div style="overflow-x:auto;"><table id="tabela-dre-Navegantes" class="dre-table"><thead></thead><tbody></tbody></table></div>
           </div>
         </div>
       </div>
@@ -3272,60 +3260,84 @@
   // ------------------------------------------------------------------
   const ORDEM_CATEGORIAS_DRE = ['Armazenagem','Movimentação','Taxas','Pessoas','Serviços','Eventos'];
   const CANAL_REAL_POR_DISPLAY_DRE = {'Loja/Varejo':'Loja', 'E.Comm':'E.Comm', 'Peças':'Peças'};
+  const DRE_MAX_VERSOES = 3;
   let dreVersaoIdx = {
-    Extrema: {a: -1, b: -1},
-    Navegantes: {a: -1, b: -1}
+    Extrema: {ids: [-1, -1]},
+    Navegantes: {ids: [-1, -1]}
   };
   const dreColapsados = {Extrema: new Set(), Navegantes: new Set()};
   const dreDrillAbertos = {Extrema: new Set(), Navegantes: new Set()};
   let dreGruposConhecidos = {Extrema: [], Navegantes: []};
-  // limiar de alerta de variação, configurável por CD: uma linha/canal/categoria
-  // é "relevante" se passar do % OU do R$ (o que disparar primeiro).
+  // limiar de alerta de variação, configurável por CD: escolhe UM critério (% ou R$)
+  // e o valor — uma linha/canal/categoria é "relevante" se passar dele.
   const dreLimiar = {
-    Extrema: {pct: 5, rs: 10000, soRelevantes: false},
-    Navegantes: {pct: 5, rs: 10000, soRelevantes: false}
+    Extrema: {tipo: 'pct', valor: 5, soRelevantes: false},
+    Navegantes: {tipo: 'pct', valor: 5, soRelevantes: false}
   };
-  const chartsWaterfallDRE = {Extrema: null, Navegantes: null};
   function ehRelevanteDRE(valorA, valorB, loc){
     const delta = valorB - valorA;
     if(Math.abs(delta) < 0.01) return false;
     const lim = dreLimiar[loc];
-    if(Math.abs(delta) >= lim.rs) return true;
+    if(lim.tipo === 'rs') return Math.abs(delta) >= lim.valor;
     const pctMudanca = Math.abs(valorA) > 0.01 ? Math.abs(delta / valorA) : Infinity;
-    return pctMudanca >= (lim.pct / 100);
+    return pctMudanca >= (lim.valor / 100);
   }
   function seloAlertaDRE(relevante){
     return relevante ? ' <span class="dre-alerta-badge" title="Passou do limiar de alerta configurado">⚠️</span>' : '';
   }
 
   function preencherSelectsDRE(loc){
-    const selA = document.getElementById('select-dre-a-' + loc);
-    const selB = document.getElementById('select-dre-b-' + loc);
-    if(!selA || !selB) return;
-    const idx = dreVersaoIdx[loc];
-    if(idx.a < 0 || idx.a >= versoesFlow.length) idx.a = versoesFlow.length - 2;
-    if(idx.b < 0 || idx.b >= versoesFlow.length) idx.b = versoesFlow.length - 1;
-    const opcoes = versoesFlow.map((v, i) => '<option value="' + i + '">' + v.nome + '</option>').join('');
-    selA.innerHTML = opcoes;
-    selB.innerHTML = opcoes;
-    selA.value = idx.a;
-    selB.value = idx.b;
-    if(!selA.dataset.wired){
-      selA.dataset.wired = '1';
-      selA.addEventListener('change', () => { idx.a = Number(selA.value); renderDRE(loc); });
-      selB.addEventListener('change', () => { idx.b = Number(selB.value); renderDRE(loc); });
+    const lista = document.getElementById('dre-versoes-lista-' + loc);
+    const btnAdd = document.getElementById('dre-add-versao-' + loc);
+    if(!lista) return;
+    const idxObj = dreVersaoIdx[loc];
+    idxObj.ids = idxObj.ids.map(i => (i >= 0 && i < versoesFlow.length) ? i : null);
+    if(idxObj.ids.length < 2 || idxObj.ids.some(i => i === null)){
+      idxObj.ids = [Math.max(0, versoesFlow.length - 2), versoesFlow.length - 1];
     }
-    const inPct = document.getElementById('dre-limiar-pct-' + loc);
-    const inRs = document.getElementById('dre-limiar-rs-' + loc);
+    const opcoes = versoesFlow.map((v, i) => '<option value="' + i + '">' + v.nome + '</option>').join('');
+    lista.innerHTML = idxObj.ids.map((valorSel, slot) => {
+      const podeRemover = idxObj.ids.length > 2;
+      return '<span style="display:flex; align-items:center; gap:4px;">' +
+        '<label style="font-size:13px; color:var(--text2);">V' + (slot + 1) + ':</label>' +
+        '<select data-slot="' + slot + '" style="font-size:13px; padding:5px 8px; border-radius:var(--radius); border:1px solid var(--border);">' + opcoes + '</select>' +
+        (podeRemover ? '<span class="dre-toggle" title="Remover essa versão da comparação" onclick="window.__dreRemoverVersao(\'' + loc + '\',' + slot + ')" style="color:#c0392b; width:auto;">✕</span>' : '') +
+        '</span>';
+    }).join('');
+    lista.querySelectorAll('select').forEach((sel, slot) => {
+      sel.value = idxObj.ids[slot];
+      sel.addEventListener('change', () => { idxObj.ids[slot] = Number(sel.value); renderDRE(loc); });
+    });
+    if(btnAdd) btnAdd.style.display = (idxObj.ids.length < DRE_MAX_VERSOES && idxObj.ids.length < versoesFlow.length) ? '' : 'none';
+
+    const selTipo = document.getElementById('dre-limiar-tipo-' + loc);
+    const inValor = document.getElementById('dre-limiar-valor-' + loc);
     const chkSo = document.getElementById('dre-so-relevantes-' + loc);
-    if(inPct && !inPct.dataset.wired){
-      inPct.dataset.wired = '1'; inRs.dataset.wired = '1'; chkSo.dataset.wired = '1';
-      inPct.value = dreLimiar[loc].pct; inRs.value = dreLimiar[loc].rs; chkSo.checked = dreLimiar[loc].soRelevantes;
-      inPct.addEventListener('change', () => { dreLimiar[loc].pct = Number(inPct.value) || 0; renderDRE(loc); });
-      inRs.addEventListener('change', () => { dreLimiar[loc].rs = Number(inRs.value) || 0; renderDRE(loc); });
+    if(selTipo && !selTipo.dataset.wired){
+      selTipo.dataset.wired = '1'; inValor.dataset.wired = '1'; chkSo.dataset.wired = '1';
+      selTipo.value = dreLimiar[loc].tipo; inValor.value = dreLimiar[loc].valor; chkSo.checked = dreLimiar[loc].soRelevantes;
+      selTipo.addEventListener('change', () => { dreLimiar[loc].tipo = selTipo.value; renderDRE(loc); });
+      inValor.addEventListener('change', () => { dreLimiar[loc].valor = Number(inValor.value) || 0; renderDRE(loc); });
       chkSo.addEventListener('change', () => { dreLimiar[loc].soRelevantes = chkSo.checked; renderDRE(loc); });
     }
   }
+  function dreAdicionarVersao(loc){
+    const idxObj = dreVersaoIdx[loc];
+    if(idxObj.ids.length >= DRE_MAX_VERSOES || idxObj.ids.length >= versoesFlow.length) return;
+    const usados = new Set(idxObj.ids);
+    let candidato = versoesFlow.length - 1;
+    for(let i = versoesFlow.length - 1; i >= 0; i--){ if(!usados.has(i)){ candidato = i; break; } }
+    idxObj.ids.push(candidato);
+    renderDRE(loc);
+  }
+  function dreRemoverVersao(loc, slot){
+    const idxObj = dreVersaoIdx[loc];
+    if(idxObj.ids.length <= 2) return;
+    idxObj.ids.splice(slot, 1);
+    renderDRE(loc);
+  }
+  window.__dreAdicionarVersao = dreAdicionarVersao;
+  window.__dreRemoverVersao = dreRemoverVersao;
 
   function toggleDreGrupo(loc, groupId){
     if(dreColapsados[loc].has(groupId)) dreColapsados[loc].delete(groupId);
@@ -3504,13 +3516,15 @@
       }
       preencherSelectsDRE(loc);
 
-      const idx = dreVersaoIdx[loc];
-      const versaoA = versoesFlow[idx.a];
-      const versaoB = versoesFlow[idx.b];
-      const detA = computeDetalheCompleto(loc, versaoA.fontes);
-      const detB = computeDetalheCompleto(loc, versaoB.fontes);
-      const resA = computeCustos(versaoA.fontes);
-      const resB = computeCustos(versaoB.fontes);
+      // suporta 2 ou 3 versões em comparação (A/B ou A/B/C). A tabela mostra um bloco
+      // de 5 colunas (V|%|V|%|Δ) por PAR CONSECUTIVO (A→B, e B→C se houver a 3ª);
+      // alerta/destaque e a "causa física" olham só pro ÚLTIMO par (a comparação mais
+      // recente); os Top Drivers olham pra ponta a ponta (1ª vs última versão).
+      const idxObj = dreVersaoIdx[loc];
+      const versoesComparadas = idxObj.ids.map(i => versoesFlow[i]);
+      const nV = versoesComparadas.length;
+      const detsPorVersao = versoesComparadas.map(v => computeDetalheCompleto(loc, v.fontes));
+      const ressPorVersao = versoesComparadas.map(v => computeCustos(v.fontes));
       const mesesPeriodo = mesesDoPeriodo();
 
       function totalPeriodo(valoresPorMes){
@@ -3519,33 +3533,67 @@
         return t;
       }
       function divSeguro(num, den){ return den > 0.005 || den < -0.005 ? num / den : null; }
+      // concatena os blocos de 5 colunas de TODOS os pares consecutivos, pra um mês só
+      function blocosParesMes(valoresPorVersao, paiPorVersao, m){
+        let html = '';
+        for(let p = 0; p < nV - 1; p++) html += blocoDRE(valoresPorVersao[p][m], valoresPorVersao[p + 1][m], divSeguro(valoresPorVersao[p][m], paiPorVersao[p][m]), divSeguro(valoresPorVersao[p + 1][m], paiPorVersao[p + 1][m]));
+        return html;
+      }
+      // idem, mas pro bloco "Total do período" (valores já somados no período)
+      function blocosParesTotal(totaisPeriodo, paiTotaisPeriodo){
+        let html = '';
+        for(let p = 0; p < nV - 1; p++) html += blocoDRE(totaisPeriodo[p], totaisPeriodo[p + 1], divSeguro(totaisPeriodo[p], paiTotaisPeriodo[p]), divSeguro(totaisPeriodo[p + 1], paiTotaisPeriodo[p + 1]));
+        return html;
+      }
 
       // chave única por linha: id + canal (a mesma cobrança pode existir 1x por canal)
       function chave(l){ return (l.id || l.nome) + '|' + (l.categoriaCanal || '—'); }
-      const mapaA = {}; detA.forEach(l => { mapaA[chave(l)] = l; });
-      const mapaB = {}; detB.forEach(l => { mapaB[chave(l)] = l; });
-      const todasChaves = new Set([...Object.keys(mapaA), ...Object.keys(mapaB)]);
+      const mapasPorVersao = detsPorVersao.map(det => { const m = {}; det.forEach(l => { m[chave(l)] = l; }); return m; });
+      const todasChaves = new Set();
+      mapasPorVersao.forEach(m => Object.keys(m).forEach(k => todasChaves.add(k)));
 
-      // agrupa Categoria > Canal > Cobrança
+      // agrupa Categoria > Canal > Cobrança, guardando um array de 12 meses POR VERSÃO
       const grupos = {};
       todasChaves.forEach(k => {
-        const a = mapaA[k], b = mapaB[k];
-        const base = a || b;
+        const entradas = mapasPorVersao.map(m => m[k]);
+        const base = entradas.find(e => e);
         const categoria = base.categoriaLinha || '(sem categoria)';
         const canalDisplay = base.categoriaCanal || '—';
-        const valoresA = a ? a.valoresPorMes : Array(12).fill(0);
-        const valoresB = b ? b.valoresPorMes : Array(12).fill(0);
-        if(!grupos[categoria]) grupos[categoria] = {canais: {}, totalA: Array(12).fill(0), totalB: Array(12).fill(0)};
+        const valoresPorVersao = entradas.map(e => e ? e.valoresPorMes : Array(12).fill(0));
+        if(!grupos[categoria]) grupos[categoria] = {canais: {}, totaisPorVersao: Array.from({length: nV}, () => Array(12).fill(0))};
         const g = grupos[categoria];
-        if(!g.canais[canalDisplay]) g.canais[canalDisplay] = {linhas: [], totalA: Array(12).fill(0), totalB: Array(12).fill(0)};
+        if(!g.canais[canalDisplay]) g.canais[canalDisplay] = {linhas: [], totaisPorVersao: Array.from({length: nV}, () => Array(12).fill(0))};
         const c = g.canais[canalDisplay];
-        c.linhas.push({id: base.id, nome: base.nome, valoresA, valoresB});
-        for(let m = 0; m < 12; m++){ c.totalA[m] += valoresA[m]; c.totalB[m] += valoresB[m]; g.totalA[m] += valoresA[m]; g.totalB[m] += valoresB[m]; }
+        c.linhas.push({id: base.id, nome: base.nome, valoresPorVersao});
+        for(let m = 0; m < 12; m++){ for(let v = 0; v < nV; v++){ c.totaisPorVersao[v][m] += valoresPorVersao[v][m]; g.totaisPorVersao[v][m] += valoresPorVersao[v][m]; } }
       });
 
-      // "Top drivers": lista achatada de todas as cobranças (Categoria › Canal › Nome)
-      // com seu Δ no período, ranqueada pra mostrar rapidinho quem mais pesou na variação
-      // total, sem precisar abrir categoria por categoria.
+      // ajuste de Faturamento Mínimo por versão (só entra se pesou em algum mês, em qualquer versão)
+      let temAjusteMinimo = false;
+      const ajustesPorVersao = Array.from({length: nV}, () => Array(12).fill(0));
+      ressPorVersao.forEach((res, v) => {
+        if(!res) return;
+        const linhasV = res.linhasCusto.filter(l => l.loc === loc);
+        for(let m = 0; m < 12; m++){
+          const ajV = (linhasV.find(l => l.mes === m) || {});
+          ajustesPorVersao[v][m] = (ajV.totalCobrado || 0) - (ajV.totalVariavel || 0);
+          if(Math.abs(ajustesPorVersao[v][m]) > 0.01) temAjusteMinimo = true;
+        }
+      });
+
+      const nomesCategorias = ORDEM_CATEGORIAS_DRE.filter(c => grupos[c]).concat(Object.keys(grupos).filter(c => !ORDEM_CATEGORIAS_DRE.includes(c)));
+      const gruposConhecidos = [];
+      let linhasHtml = '';
+      const soRelevantes = dreLimiar[loc].soRelevantes;
+
+      // pré-passo: soma o total geral (todas categorias) ANTES de montar as linhas,
+      // pra % de cada categoria ser sobre o total real, não sobre ela mesma.
+      const totalGeralPorVersao = Array.from({length: nV}, () => Array(12).fill(0));
+      nomesCategorias.forEach(cat => { for(let m = 0; m < 12; m++){ for(let v = 0; v < nV; v++) totalGeralPorVersao[v][m] += grupos[cat].totaisPorVersao[v][m]; } });
+      const totalGeralPeriodoPorVersao = totalGeralPorVersao.map(arr => totalPeriodo(arr));
+
+      // "Top drivers": lista achatada de todas as cobranças (Categoria › Canal › Nome),
+      // ranqueada pelo Δ entre a 1ª e a última versão comparada (ponta a ponta).
       const elTopDrivers = document.getElementById('dre-top-drivers-' + loc);
       if(elTopDrivers){
         const todasLinhasFlat = [];
@@ -3553,7 +3601,7 @@
           const g = grupos[cat];
           Object.keys(g.canais).forEach(canalNome => {
             g.canais[canalNome].linhas.forEach(l => {
-              const a = totalPeriodo(l.valoresA), b = totalPeriodo(l.valoresB);
+              const a = totalPeriodo(l.valoresPorVersao[0]), b = totalPeriodo(l.valoresPorVersao[nV - 1]);
               const delta = b - a;
               if(Math.abs(delta) < 0.01) return;
               todasLinhasFlat.push({cat, canal: canalNome, nome: l.nome, delta});
@@ -3577,103 +3625,22 @@
               '</div>';
           }).join('');
         } else {
-          elTopDrivers.innerHTML = '<div class="secao-nota">Nenhuma variação relevante entre as duas versões nesse período.</div>';
+          elTopDrivers.innerHTML = '<div class="secao-nota">Nenhuma variação relevante entre as versões nesse período.</div>';
         }
       }
 
-      // ajuste de Faturamento Mínimo (só entra se ele realmente pesou em algum mês, em A ou B)
-      let temAjusteMinimo = false;
-      const ajusteA = Array(12).fill(0), ajusteB = Array(12).fill(0);
-      if(resA && resB){
-        const linhasA = resA.linhasCusto.filter(l => l.loc === loc);
-        const linhasB = resB.linhasCusto.filter(l => l.loc === loc);
-        for(let m = 0; m < 12; m++){
-          const ajA = (linhasA.find(l => l.mes === m) || {});
-          const ajB = (linhasB.find(l => l.mes === m) || {});
-          ajusteA[m] = (ajA.totalCobrado || 0) - (ajA.totalVariavel || 0);
-          ajusteB[m] = (ajB.totalCobrado || 0) - (ajB.totalVariavel || 0);
-          if(Math.abs(ajusteA[m]) > 0.01 || Math.abs(ajusteB[m]) > 0.01) temAjusteMinimo = true;
-        }
-      }
-
-      const nomesCategorias = ORDEM_CATEGORIAS_DRE.filter(c => grupos[c]).concat(Object.keys(grupos).filter(c => !ORDEM_CATEGORIAS_DRE.includes(c)));
-      const totalGeralA = Array(12).fill(0), totalGeralB = Array(12).fill(0);
-      const gruposConhecidos = [];
-      let linhasHtml = '';
-      const soRelevantes = dreLimiar[loc].soRelevantes;
-
-      // pré-passo: soma o total geral (todas categorias) ANTES de montar as linhas,
-      // pra % de cada categoria ser sobre o total real, não sobre ela mesma.
-      nomesCategorias.forEach(cat => { for(let m = 0; m < 12; m++){ totalGeralA[m] += grupos[cat].totalA[m]; totalGeralB[m] += grupos[cat].totalB[m]; } });
-      const totalGeralPeriodoA = totalPeriodo(totalGeralA), totalGeralPeriodoB = totalPeriodo(totalGeralB);
-
-      // waterfall: barra flutuante do total V.A até o total V.B, passando por cada
-      // categoria (e o ajuste de mínimo, se houver) na ordem em que elas entram na soma.
-      const canvasWf = document.getElementById('chart-waterfall-dre-' + loc);
-      if(canvasWf && typeof Chart !== 'undefined'){
-        const labelsWf = ['V.' + versaoA.nome];
-        const dataWf = [[0, totalGeralPeriodoA]];
-        const coresWf = ['#7a8896'];
-        let cursorWf = totalGeralPeriodoA;
-        nomesCategorias.forEach(cat => {
-          const g = grupos[cat];
-          const a = totalPeriodo(g.totalA), b = totalPeriodo(g.totalB);
-          const delta = b - a;
-          if(Math.abs(delta) < 0.01) return;
-          const ini = cursorWf, fim = cursorWf + delta;
-          dataWf.push([Math.min(ini, fim), Math.max(ini, fim)]);
-          labelsWf.push(cat);
-          coresWf.push(delta < 0 ? '#0f6e56' : '#c0392b');
-          cursorWf = fim;
-        });
-        if(temAjusteMinimo){
-          const ajA = totalPeriodo(ajusteA), ajB = totalPeriodo(ajusteB);
-          const deltaAj = ajB - ajA;
-          if(Math.abs(deltaAj) >= 0.01){
-            const ini = cursorWf, fim = cursorWf + deltaAj;
-            dataWf.push([Math.min(ini, fim), Math.max(ini, fim)]);
-            labelsWf.push('Ajuste Mínimo');
-            coresWf.push(deltaAj < 0 ? '#0f6e56' : '#c0392b');
-            cursorWf = fim;
-          }
-        }
-        labelsWf.push('V.' + versaoB.nome);
-        dataWf.push([0, totalGeralPeriodoB]);
-        coresWf.push('#7a8896');
-
-        if(chartsWaterfallDRE[loc]) chartsWaterfallDRE[loc].destroy();
-        chartsWaterfallDRE[loc] = new Chart(canvasWf, {
-          type: 'bar',
-          data: {labels: labelsWf, datasets: [{data: dataWf, backgroundColor: coresWf, borderRadius: 3}]},
-          options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: {
-              legend: {display: false},
-              tooltip: {callbacks: {label: c => {
-                const ini = c.raw[0], fim = c.raw[1];
-                return formatR$(ini) + ' → ' + formatR$(fim) + '  (Δ ' + formatR$(fim - ini) + ')';
-              }}}
-            },
-            scales: {
-              y: {ticks: {callback: v => (v / 1000).toLocaleString('pt-BR') + 'k'}, grid: {color: 'rgba(137,135,129,0.15)'}},
-              x: {grid: {display: false}, ticks: {autoSkip: false, maxRotation: 30, minRotation: 0}}
-            }
-          }
-        });
-      }
-
-      // pré-passo de relevância (bottom-up): uma categoria/canal é "relevante" se ela
-      // mesma passar do limiar OU se algum descendente passar — decide o que o filtro
-      // "só relevantes" esconde, sem sumir com um pai que tem um filho relevante lá embaixo.
+      // pré-passo de relevância (bottom-up), baseado no ÚLTIMO par (comparação mais
+      // recente): uma categoria/canal é "relevante" se ela mesma passar do limiar OU
+      // se algum descendente passar.
       const relevanciaCanal = {}, relevanciaLinha = {}, relevanciaCategoria = {};
       nomesCategorias.forEach(cat => {
         const g = grupos[cat];
-        let catTemRelevante = ehRelevanteDRE(totalPeriodo(g.totalA), totalPeriodo(g.totalB), loc);
+        let catTemRelevante = ehRelevanteDRE(totalPeriodo(g.totaisPorVersao[nV - 2]), totalPeriodo(g.totaisPorVersao[nV - 1]), loc);
         Object.keys(g.canais).forEach(canalNome => {
           const c = g.canais[canalNome];
-          let canTemRelevante = ehRelevanteDRE(totalPeriodo(c.totalA), totalPeriodo(c.totalB), loc);
+          let canTemRelevante = ehRelevanteDRE(totalPeriodo(c.totaisPorVersao[nV - 2]), totalPeriodo(c.totaisPorVersao[nV - 1]), loc);
           c.linhas.forEach(l => {
-            const lRel = ehRelevanteDRE(totalPeriodo(l.valoresA), totalPeriodo(l.valoresB), loc);
+            const lRel = ehRelevanteDRE(totalPeriodo(l.valoresPorVersao[nV - 2]), totalPeriodo(l.valoresPorVersao[nV - 1]), loc);
             relevanciaLinha[cat + '|' + canalNome + '|' + l.id] = lRel;
             if(lRel) canTemRelevante = true;
           });
@@ -3689,63 +3656,62 @@
         const catId = loc + '|cat|' + catIdx;
         gruposConhecidos.push(catId);
         const catColapsada = dreColapsados[loc].has(catId);
-        const catTotalA = totalPeriodo(g.totalA), catTotalB = totalPeriodo(g.totalB);
-        const catPropRelevante = ehRelevanteDRE(catTotalA, catTotalB, loc);
+        const catTotaisPeriodo = g.totaisPorVersao.map(arr => totalPeriodo(arr));
+        const catPropRelevante = ehRelevanteDRE(catTotaisPeriodo[nV - 2], catTotaisPeriodo[nV - 1], loc);
 
         const celulasMesCat = [];
-        for(let m = periodoDe; m <= periodoAte; m++) celulasMesCat.push(blocoDRE(g.totalA[m], g.totalB[m], divSeguro(g.totalA[m], totalGeralA[m]), divSeguro(g.totalB[m], totalGeralB[m])));
+        for(let m = periodoDe; m <= periodoAte; m++) celulasMesCat.push(blocosParesMes(g.totaisPorVersao, totalGeralPorVersao, m));
         linhasHtml += '<tr class="dre-cat-row' + (catPropRelevante ? ' dre-alerta' : '') + '"><td><span class="dre-toggle" onclick="window.__toggleDreGrupo(\'' + loc + '\',\'' + catId + '\')">' + (catColapsada ? '▸' : '▾') + '</span> ' + cat + seloAlertaDRE(catPropRelevante) + '</td>' +
-          celulasMesCat.join('') + blocoDRE(catTotalA, catTotalB, divSeguro(catTotalA, totalGeralPeriodoA), divSeguro(catTotalB, totalGeralPeriodoB)) + '</tr>';
+          celulasMesCat.join('') + blocosParesTotal(catTotaisPeriodo, totalGeralPeriodoPorVersao) + '</tr>';
 
-        const nomesCanais = Object.keys(g.canais).sort((x, y) => Math.abs(totalPeriodo(g.canais[y].totalB) - totalPeriodo(g.canais[y].totalA)) - Math.abs(totalPeriodo(g.canais[x].totalB) - totalPeriodo(g.canais[x].totalA)));
+        const nomesCanais = Object.keys(g.canais).sort((x, y) => Math.abs(totalPeriodo(g.canais[y].totaisPorVersao[nV - 1]) - totalPeriodo(g.canais[y].totaisPorVersao[nV - 2])) - Math.abs(totalPeriodo(g.canais[x].totaisPorVersao[nV - 1]) - totalPeriodo(g.canais[x].totaisPorVersao[nV - 2])));
         nomesCanais.forEach((canalNome, canIdx) => {
           if(soRelevantes && !relevanciaCanal[cat + '|' + canalNome]) return;
           const c = g.canais[canalNome];
           const canId = catId + '|can|' + canIdx;
           gruposConhecidos.push(canId);
           const canColapsada = dreColapsados[loc].has(canId);
-          const canTotalA = totalPeriodo(c.totalA), canTotalB = totalPeriodo(c.totalB);
-          const pctCanA = divSeguro(canTotalA, catTotalA), pctCanB = divSeguro(canTotalB, catTotalB);
-          const canPropRelevante = ehRelevanteDRE(canTotalA, canTotalB, loc);
+          const canTotaisPeriodo = c.totaisPorVersao.map(arr => totalPeriodo(arr));
+          const canPropRelevante = ehRelevanteDRE(canTotaisPeriodo[nV - 2], canTotaisPeriodo[nV - 1], loc);
           const celulasMesCan = [];
-          for(let m = periodoDe; m <= periodoAte; m++) celulasMesCan.push(blocoDRE(c.totalA[m], c.totalB[m], divSeguro(c.totalA[m], g.totalA[m]), divSeguro(c.totalB[m], g.totalB[m])));
+          for(let m = periodoDe; m <= periodoAte; m++) celulasMesCan.push(blocosParesMes(c.totaisPorVersao, g.totaisPorVersao, m));
           linhasHtml += '<tr class="dre-canal-row' + (catColapsada ? ' dre-oculto' : '') + (canPropRelevante ? ' dre-alerta' : '') + '"><td><span class="dre-toggle" onclick="window.__toggleDreGrupo(\'' + loc + '\',\'' + canId + '\')">' + (canColapsada ? '▸' : '▾') + '</span> ' + canalNome + seloAlertaDRE(canPropRelevante) + '</td>' +
-            celulasMesCan.join('') + blocoDRE(canTotalA, canTotalB, pctCanA, pctCanB) + '</tr>';
+            celulasMesCan.join('') + blocosParesTotal(canTotaisPeriodo, catTotaisPeriodo) + '</tr>';
 
-          c.linhas.sort((x, y) => Math.abs(totalPeriodo(y.valoresB) - totalPeriodo(y.valoresA)) - Math.abs(totalPeriodo(x.valoresB) - totalPeriodo(x.valoresA)));
+          c.linhas.sort((x, y) => Math.abs(totalPeriodo(y.valoresPorVersao[nV - 1]) - totalPeriodo(y.valoresPorVersao[nV - 2])) - Math.abs(totalPeriodo(x.valoresPorVersao[nV - 1]) - totalPeriodo(x.valoresPorVersao[nV - 2])));
           c.linhas.forEach(l => {
             const lRelevante = relevanciaLinha[cat + '|' + canalNome + '|' + l.id];
             if(soRelevantes && !lRelevante) return;
-            const linTotalA = totalPeriodo(l.valoresA), linTotalB = totalPeriodo(l.valoresB);
-            const pctLinA = divSeguro(linTotalA, canTotalA), pctLinB = divSeguro(linTotalB, canTotalB);
+            const linTotaisPeriodo = l.valoresPorVersao.map(arr => totalPeriodo(arr));
+            const linTotalUltA = linTotaisPeriodo[nV - 2], linTotalUltB = linTotaisPeriodo[nV - 1];
             const celulasMesLin = [];
-            for(let m = periodoDe; m <= periodoAte; m++) celulasMesLin.push(blocoDRE(l.valoresA[m], l.valoresB[m], divSeguro(l.valoresA[m], c.totalA[m]), divSeguro(l.valoresB[m], c.totalB[m])));
+            for(let m = periodoDe; m <= periodoAte; m++) celulasMesLin.push(blocosParesMes(l.valoresPorVersao, c.totaisPorVersao, m));
             const oculta = catColapsada || canColapsada;
             const basis = basisDaLinhaDRE(loc, l.id, canalNome);
             const lineKey = catId + '|lin|' + canIdx + '|' + l.id;
-            const temDrill = basis && Math.abs(linTotalB - linTotalA) >= 0.01;
+            const temDrill = basis && Math.abs(linTotalUltB - linTotalUltA) >= 0.01;
             const drillAberto = dreDrillAbertos[loc].has(lineKey);
             const toggleDrill = temDrill
-              ? '<span class="dre-toggle dre-toggle-drill" title="Ver a causa física (PD/Família) — clique pra expandir" onclick="window.__toggleDreDrilldown(\'' + loc + '\',\'' + lineKey + '\')">' + (drillAberto ? '▾ causa física' : '▸ causa física') + '</span> '
+              ? '<span class="dre-toggle dre-toggle-drill" title="Ver a causa física (PD/Família) do último par de versões — clique pra expandir" onclick="window.__toggleDreDrilldown(\'' + loc + '\',\'' + lineKey + '\')">' + (drillAberto ? '▾ causa física' : '▸ causa física') + '</span> '
               : '';
             linhasHtml += '<tr class="dre-linha-row' + (oculta ? ' dre-oculto' : '') + (lRelevante ? ' dre-alerta' : '') + '"><td class="dre-linha-nome">' + l.nome + seloAlertaDRE(lRelevante) + (temDrill ? '<br>' + toggleDrill : '') + '</td>' +
-              celulasMesLin.join('') + blocoDRE(linTotalA, linTotalB, pctLinA, pctLinB) + '</tr>';
+              celulasMesLin.join('') + blocosParesTotal(linTotaisPeriodo, canTotaisPeriodo) + '</tr>';
 
             if(temDrill && drillAberto){
-              const drill = drilldownFisicoDRE(loc, l.id, canalNome, versaoA, versaoB);
+              const drill = drilldownFisicoDRE(loc, l.id, canalNome, versoesComparadas[nV - 2], versoesComparadas[nV - 1]);
               if(drill && drill.length){
                 drill.forEach(d => {
                   const sinal = d.deltaFisico > 0 ? '+' : '';
                   const textoFisico = d.unidade
-                    ? '<div class="dre-sub">Volume no período: ' + formatQtdDRE(d.physA) + ' → ' + formatQtdDRE(d.physB) + ' ' + d.unidade + ' (' + sinal + formatQtdDRE(d.deltaFisico) + ' ' + d.unidade + ')</div>'
+                    ? '<div class="dre-sub">Volume no período (último par): ' + formatQtdDRE(d.physA) + ' → ' + formatQtdDRE(d.physB) + ' ' + d.unidade + ' (' + sinal + formatQtdDRE(d.deltaFisico) + ' ' + d.unidade + ')</div>'
                     : '';
-                  const celulasMesDrill = d.porMesA.map((vA, i) => blocoFisicoDRE(vA, d.porMesB[i], d.unidade)).join('');
+                  const celulasMesDrill = d.porMesA.map((vA, i) => celulasVaziasDRE(nV - 2) + blocoFisicoDRE(vA, d.porMesB[i], d.unidade)).join('');
                   linhasHtml += '<tr class="dre-drill-row' + (oculta ? ' dre-oculto' : '') + '"><td class="dre-drill-nome">' + d.chave + textoFisico + '</td>' +
                     celulasMesDrill +
-                    '<td></td><td></td><td></td><td></td><td class="' + (d.delta < 0 ? 'dre-up' : 'dre-down') + '">' + seloVariacaoDRE(d.delta) + ' ' + formatR$(Math.abs(d.delta)) + '</td></tr>';
+                    celulasVaziasDRE(nV - 2) + '<td></td><td></td><td></td><td></td><td class="' + (d.delta < 0 ? 'dre-up' : 'dre-down') + '">' + seloVariacaoDRE(d.delta) + ' ' + formatR$(Math.abs(d.delta)) + '</td></tr>';
                 });
               } else {
-                linhasHtml += '<tr class="dre-drill-row' + (oculta ? ' dre-oculto' : '') + '"><td class="dre-drill-nome">Nenhum PD/Família com variação relevante nesse período.</td>' + celulasVaziasDRE(mesesPeriodo.length + 1) + '</tr>';
+                linhasHtml += '<tr class="dre-drill-row' + (oculta ? ' dre-oculto' : '') + '"><td class="dre-drill-nome">Nenhum PD/Família com variação relevante nesse período (último par).</td>' + celulasVaziasDRE((mesesPeriodo.length + 1) * (nV - 1)) + '</tr>';
               }
             }
           });
@@ -3753,22 +3719,29 @@
       });
 
       if(temAjusteMinimo){
-        for(let m = 0; m < 12; m++){ totalGeralA[m] += ajusteA[m]; totalGeralB[m] += ajusteB[m]; }
+        for(let m = 0; m < 12; m++){ for(let v = 0; v < nV; v++) totalGeralPorVersao[v][m] += ajustesPorVersao[v][m]; }
         const celulasAj = [];
-        for(let m = periodoDe; m <= periodoAte; m++) celulasAj.push(blocoDRE(ajusteA[m], ajusteB[m], null, null));
-        linhasHtml += '<tr class="dre-cat-row"><td>Ajuste Faturamento Mínimo</td>' + celulasAj.join('') + blocoDRE(totalPeriodo(ajusteA), totalPeriodo(ajusteB), null, null) + '</tr>';
+        for(let m = periodoDe; m <= periodoAte; m++) celulasAj.push(blocosParesMes(ajustesPorVersao, ajustesPorVersao, m).replace(/<td class="dre-sub">[^<]*<\/td>/g, '<td></td>'));
+        const ajTotaisPeriodo = ajustesPorVersao.map(arr => totalPeriodo(arr));
+        let totalAjBlocos = '';
+        for(let p = 0; p < nV - 1; p++) totalAjBlocos += blocoDRE(ajTotaisPeriodo[p], ajTotaisPeriodo[p + 1], null, null);
+        linhasHtml += '<tr class="dre-cat-row"><td>Ajuste Faturamento Mínimo</td>' + celulasAj.join('') + totalAjBlocos + '</tr>';
       }
+      const totalGeralPeriodoFinalPorVersao = totalGeralPorVersao.map(arr => totalPeriodo(arr));
 
       const celulasTotal = [];
-      for(let m = periodoDe; m <= periodoAte; m++) celulasTotal.push(blocoDRE(totalGeralA[m], totalGeralB[m], 1, 1));
-      linhasHtml += '<tr class="dre-total-row"><td>TOTAL COBRADO</td>' + celulasTotal.join('') + blocoDRE(totalPeriodo(totalGeralA), totalPeriodo(totalGeralB), 1, 1) + '</tr>';
+      for(let m = periodoDe; m <= periodoAte; m++) celulasTotal.push(blocosParesMes(totalGeralPorVersao, totalGeralPorVersao, m));
+      linhasHtml += '<tr class="dre-total-row"><td>TOTAL COBRADO</td>' + celulasTotal.join('') + blocosParesTotal(totalGeralPeriodoFinalPorVersao, totalGeralPeriodoFinalPorVersao) + '</tr>';
 
       dreGruposConhecidos[loc] = gruposConhecidos;
-      const subHeaderBloco = '<th>V.' + versaoA.nome + '</th><th>%</th><th>V.' + versaoB.nome + '</th><th>%</th><th>Δ</th>';
-      thead.innerHTML = '<tr><th rowspan="2">' + versaoA.nome + ' → ' + versaoB.nome + '</th>' +
-          mesesPeriodo.map(m => '<th colspan="5">' + m + '</th>').join('') +
-          '<th colspan="5">Total do período</th></tr>' +
-        '<tr>' + mesesPeriodo.map(() => subHeaderBloco).join('') + subHeaderBloco + '</tr>';
+      const paresNomes = [];
+      for(let p = 0; p < nV - 1; p++) paresNomes.push([versoesComparadas[p].nome, versoesComparadas[p + 1].nome]);
+      function subHeaderBlocosDRE(){ return paresNomes.map(([n1, n2]) => '<th>V.' + n1 + '</th><th>%</th><th>V.' + n2 + '</th><th>%</th><th>Δ</th>').join(''); }
+      const colspanBloco = 5 * (nV - 1);
+      thead.innerHTML = '<tr><th rowspan="2">' + versoesComparadas.map(v => v.nome).join(' → ') + '</th>' +
+          mesesPeriodo.map(m => '<th colspan="' + colspanBloco + '">' + m + '</th>').join('') +
+          '<th colspan="' + colspanBloco + '">Total do período</th></tr>' +
+        '<tr>' + mesesPeriodo.map(() => subHeaderBlocosDRE()).join('') + subHeaderBlocosDRE() + '</tr>';
       tbody.innerHTML = linhasHtml;
     });
   }
@@ -3785,70 +3758,71 @@
     if(typeof ExcelJS === 'undefined'){ alert('A biblioteca de exportação não carregou (verifique sua conexão) — recarregue a página e tente de novo.'); return; }
     if(versoesFlow.length < 2 || !custosParsed){ alert('Carregue pelo menos duas versões do BP27 antes de exportar o DRE.'); return; }
 
-    const idx = dreVersaoIdx[loc];
-    const versaoA = versoesFlow[idx.a];
-    const versaoB = versoesFlow[idx.b];
-    const detA = computeDetalheCompleto(loc, versaoA.fontes);
-    const detB = computeDetalheCompleto(loc, versaoB.fontes);
-    const resA = computeCustos(versaoA.fontes);
-    const resB = computeCustos(versaoB.fontes);
+    // espelha o mesmo suporte a 2 ou 3 versões (pares consecutivos) do simulador.
+    const idxObj = dreVersaoIdx[loc];
+    const versoesComparadas = idxObj.ids.map(i => versoesFlow[i]);
+    const nV = versoesComparadas.length;
+    const detsPorVersao = versoesComparadas.map(v => computeDetalheCompleto(loc, v.fontes));
+    const ressPorVersao = versoesComparadas.map(v => computeCustos(v.fontes));
     const mesesPeriodo = mesesDoPeriodo();
 
     function totalPeriodo(valoresPorMes){ let t = 0; for(let m = periodoDe; m <= periodoAte; m++) t += valoresPorMes[m]; return t; }
     function divSeguro(num, den){ return (den > 0.005 || den < -0.005) ? num / den : null; }
     function chave(l){ return (l.id || l.nome) + '|' + (l.categoriaCanal || '—'); }
-    const mapaA = {}; detA.forEach(l => { mapaA[chave(l)] = l; });
-    const mapaB = {}; detB.forEach(l => { mapaB[chave(l)] = l; });
-    const todasChaves = new Set([...Object.keys(mapaA), ...Object.keys(mapaB)]);
+    const mapasPorVersao = detsPorVersao.map(det => { const m = {}; det.forEach(l => { m[chave(l)] = l; }); return m; });
+    const todasChaves = new Set();
+    mapasPorVersao.forEach(m => Object.keys(m).forEach(k => todasChaves.add(k)));
 
     const grupos = {};
     todasChaves.forEach(k => {
-      const a = mapaA[k], b = mapaB[k];
-      const base = a || b;
+      const entradas = mapasPorVersao.map(m => m[k]);
+      const base = entradas.find(e => e);
       const categoria = base.categoriaLinha || '(sem categoria)';
       const canalDisplay = base.categoriaCanal || '—';
-      const valoresA = a ? a.valoresPorMes : Array(12).fill(0);
-      const valoresB = b ? b.valoresPorMes : Array(12).fill(0);
-      if(!grupos[categoria]) grupos[categoria] = {canais: {}, totalA: Array(12).fill(0), totalB: Array(12).fill(0)};
+      const valoresPorVersao = entradas.map(e => e ? e.valoresPorMes : Array(12).fill(0));
+      if(!grupos[categoria]) grupos[categoria] = {canais: {}, totaisPorVersao: Array.from({length: nV}, () => Array(12).fill(0))};
       const g = grupos[categoria];
-      if(!g.canais[canalDisplay]) g.canais[canalDisplay] = {linhas: [], totalA: Array(12).fill(0), totalB: Array(12).fill(0)};
+      if(!g.canais[canalDisplay]) g.canais[canalDisplay] = {linhas: [], totaisPorVersao: Array.from({length: nV}, () => Array(12).fill(0))};
       const c = g.canais[canalDisplay];
-      c.linhas.push({id: base.id, nome: base.nome, valoresA, valoresB});
-      for(let m = 0; m < 12; m++){ c.totalA[m] += valoresA[m]; c.totalB[m] += valoresB[m]; g.totalA[m] += valoresA[m]; g.totalB[m] += valoresB[m]; }
+      c.linhas.push({id: base.id, nome: base.nome, valoresPorVersao});
+      for(let m = 0; m < 12; m++){ for(let v = 0; v < nV; v++){ c.totaisPorVersao[v][m] += valoresPorVersao[v][m]; g.totaisPorVersao[v][m] += valoresPorVersao[v][m]; } }
     });
 
     let temAjusteMinimo = false;
-    const ajusteA = Array(12).fill(0), ajusteB = Array(12).fill(0);
-    if(resA && resB){
-      const linhasA = resA.linhasCusto.filter(l => l.loc === loc);
-      const linhasB = resB.linhasCusto.filter(l => l.loc === loc);
+    const ajustesPorVersao = Array.from({length: nV}, () => Array(12).fill(0));
+    ressPorVersao.forEach((res, v) => {
+      if(!res) return;
+      const linhasV = res.linhasCusto.filter(l => l.loc === loc);
       for(let m = 0; m < 12; m++){
-        const ajA = (linhasA.find(l => l.mes === m) || {});
-        const ajB = (linhasB.find(l => l.mes === m) || {});
-        ajusteA[m] = (ajA.totalCobrado || 0) - (ajA.totalVariavel || 0);
-        ajusteB[m] = (ajB.totalCobrado || 0) - (ajB.totalVariavel || 0);
-        if(Math.abs(ajusteA[m]) > 0.01 || Math.abs(ajusteB[m]) > 0.01) temAjusteMinimo = true;
+        const ajV = (linhasV.find(l => l.mes === m) || {});
+        ajustesPorVersao[v][m] = (ajV.totalCobrado || 0) - (ajV.totalVariavel || 0);
+        if(Math.abs(ajustesPorVersao[v][m]) > 0.01) temAjusteMinimo = true;
       }
-    }
+    });
 
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('DRE ' + loc);
     const nMeses = mesesPeriodo.length;
-    const nBlocos = nMeses + 1; // +1 = bloco "Total do período"
-    // cada bloco (por mês, e o total) sai como 5 colunas reais: V.A | % | V.B | % | Δ
-    const rotuloBloco = ['V.' + versaoA.nome, '%', 'V.' + versaoB.nome, '%', 'Δ (B − A)'];
+    const paresPorMes = nV - 1;
+    const nBlocosLargura = (nMeses + 1) * paresPorMes; // +1 = bloco "Total do período", cada um com (nV-1) pares
+    const paresNomesExp = [];
+    for(let p = 0; p < nV - 1; p++) paresNomesExp.push(['V.' + versoesComparadas[p].nome, 'V.' + versoesComparadas[p + 1].nome]);
+    function rotulosBlocoExp(n1, n2){ return [n1, '%', n2, '%', 'Δ']; }
     // coluna de Nível: filtro de hierarquia — 1=Categoria (ex.: Armazenagem),
     // 2=Canal (ex.: Peças), 3=Cobrança/linha de custo (ex.: Bloco), 4=item de causa física (drill-down).
     const headerTopo = ['Nível', 'Descrição'];
     const headerSub = ['', ''];
-    mesesPeriodo.forEach(m => { headerTopo.push(m, '', '', '', ''); headerSub.push(...rotuloBloco); });
-    headerTopo.push('Total do período', '', '', '', '');
-    headerSub.push(...rotuloBloco);
+    mesesPeriodo.forEach(m => {
+      paresNomesExp.forEach(() => headerTopo.push(m, '', '', '', ''));
+      paresNomesExp.forEach(([n1, n2]) => headerSub.push(...rotulosBlocoExp(n1, n2)));
+    });
+    paresNomesExp.forEach(() => headerTopo.push('Total do período', '', '', '', ''));
+    paresNomesExp.forEach(([n1, n2]) => headerSub.push(...rotulosBlocoExp(n1, n2)));
     ws.addRow(headerTopo);
     ws.addRow(headerSub);
     ws.mergeCells(1, 1, 2, 1);
     ws.mergeCells(1, 2, 2, 2);
-    for(let b = 0; b < nBlocos; b++){
+    for(let b = 0; b < nBlocosLargura; b++){
       const c0 = 3 + b * 5;
       ws.mergeCells(1, c0, 1, c0 + 4);
     }
@@ -3861,15 +3835,26 @@
     });
     ws.views = [{state: 'frozen', xSplit: 2, ySplit: 2}];
     // ativa o AutoFiltro na coluna de Nível pra permitir filtrar por 1/2/3/4 direto no Excel
-    ws.autoFilter = {from: {row: 2, column: 1}, to: {row: 2, column: 2 + nBlocos * 5}};
+    ws.autoFilter = {from: {row: 2, column: 1}, to: {row: 2, column: 2 + nBlocosLargura * 5}};
 
     function corDelta(delta){
       if(Math.abs(delta) < 0.01) return COR_DRE_CINZA;
       return delta < 0 ? COR_DRE_VERDE : COR_DRE_VERMELHO;
     }
-    // monta os 5 valores (V.A, %A, V.B, %B, Δ) de UM bloco (mês ou total)
+    // monta os 5 valores (V.p, %, V.p+1, %, Δ) de UM bloco (mês ou total)
     function blocoValoresExp(valorA, valorB, pctA, pctB){
       return [valorA, pctA, valorB, pctB, valorB - valorA];
+    }
+    // monta TODOS os blocos (cada mês × cada par consecutivo, + o total × cada par) de um nível
+    function blocosNivelExp(valoresPorVersao, paiPorVersao){
+      const blocos = [];
+      for(let m = periodoDe; m <= periodoAte; m++){
+        for(let p = 0; p < nV - 1; p++) blocos.push(blocoValoresExp(valoresPorVersao[p][m], valoresPorVersao[p + 1][m], divSeguro(valoresPorVersao[p][m], paiPorVersao[p][m]), divSeguro(valoresPorVersao[p + 1][m], paiPorVersao[p + 1][m])));
+      }
+      const totaisPeriodo = valoresPorVersao.map(arr => totalPeriodo(arr));
+      const paiTotaisPeriodo = paiPorVersao.map(arr => totalPeriodo(arr));
+      for(let p = 0; p < nV - 1; p++) blocos.push(blocoValoresExp(totaisPeriodo[p], totaisPeriodo[p + 1], divSeguro(totaisPeriodo[p], paiTotaisPeriodo[p]), divSeguro(totaisPeriodo[p + 1], paiTotaisPeriodo[p + 1])));
+      return blocos;
     }
     function aplicarLinha(descricao, blocos, indent, opts){
       const nivel = indent + 1; // indent 0=Categoria, 1=Canal, 2=Cobrança, 3=causa física → Nível 1..4
@@ -3883,7 +3868,6 @@
         if(colNum === 1) cell.alignment = {horizontal: 'center'};
         if(colNum === 2) cell.alignment = {indent: indent};
       });
-      // formata cada bloco: colunas 3..7 do bloco 0, 8..12 do bloco 1, etc (na planilha, 1-based)
       for(let b = 0; b < blocos.length; b++){
         const c0 = 3 + b * 5;
         const cellA = row.getCell(c0), cellPctA = row.getCell(c0 + 1), cellB = row.getCell(c0 + 2), cellPctB = row.getCell(c0 + 3), cellDelta = row.getCell(c0 + 4);
@@ -3899,29 +3883,21 @@
 
     // pré-passo: total geral (todas categorias) ANTES de montar as linhas,
     // pra % de cada categoria ser sobre o total real, não sobre ela mesma.
-    const totalGeralArrA = Array(12).fill(0), totalGeralArrB = Array(12).fill(0);
-    nomesCategorias.forEach(cat => { for(let m = 0; m < 12; m++){ totalGeralArrA[m] += grupos[cat].totalA[m]; totalGeralArrB[m] += grupos[cat].totalB[m]; } });
-    const totalGeralPeriodoAExp = totalPeriodo(totalGeralArrA), totalGeralPeriodoBExp = totalPeriodo(totalGeralArrB);
+    const totalGeralPorVersaoExp = Array.from({length: nV}, () => Array(12).fill(0));
+    nomesCategorias.forEach(cat => { for(let m = 0; m < 12; m++){ for(let v = 0; v < nV; v++) totalGeralPorVersaoExp[v][m] += grupos[cat].totaisPorVersao[v][m]; } });
 
-    // monta os blocos mês-a-mês + total de um nível, dado seus arrays A/B e os arrays A/B do "pai" (pra %)
-    function blocosDoNivel(arrA, arrB, paiArrA, paiArrB){
-      const blocos = [];
-      for(let m = periodoDe; m <= periodoAte; m++) blocos.push(blocoValoresExp(arrA[m], arrB[m], divSeguro(arrA[m], paiArrA[m]), divSeguro(arrB[m], paiArrB[m])));
-      return blocos;
-    }
-
-    // mesmo pré-passo de relevância do simulador, pra respeitar o filtro "só relevantes"
-    // também na exportação (senão o Excel sairia com linhas que a tela já escondeu).
+    // mesmo pré-passo de relevância do simulador (baseado no ÚLTIMO par), pra respeitar
+    // o filtro "só relevantes" também na exportação.
     const soRelevantesExp = dreLimiar[loc].soRelevantes;
     const relevanciaCanalExp = {}, relevanciaLinhaExp = {}, relevanciaCategoriaExp = {};
     nomesCategorias.forEach(cat => {
       const g = grupos[cat];
-      let catTemRelevante = ehRelevanteDRE(totalPeriodo(g.totalA), totalPeriodo(g.totalB), loc);
+      let catTemRelevante = ehRelevanteDRE(totalPeriodo(g.totaisPorVersao[nV - 2]), totalPeriodo(g.totaisPorVersao[nV - 1]), loc);
       Object.keys(g.canais).forEach(canalNome => {
         const c = g.canais[canalNome];
-        let canTemRelevante = ehRelevanteDRE(totalPeriodo(c.totalA), totalPeriodo(c.totalB), loc);
+        let canTemRelevante = ehRelevanteDRE(totalPeriodo(c.totaisPorVersao[nV - 2]), totalPeriodo(c.totaisPorVersao[nV - 1]), loc);
         c.linhas.forEach(l => {
-          const lRel = ehRelevanteDRE(totalPeriodo(l.valoresA), totalPeriodo(l.valoresB), loc);
+          const lRel = ehRelevanteDRE(totalPeriodo(l.valoresPorVersao[nV - 2]), totalPeriodo(l.valoresPorVersao[nV - 1]), loc);
           relevanciaLinhaExp[cat + '|' + canalNome + '|' + l.id] = lRel;
           if(lRel) canTemRelevante = true;
         });
@@ -3934,38 +3910,41 @@
     nomesCategorias.forEach(cat => {
       if(soRelevantesExp && !relevanciaCategoriaExp[cat]) return;
       const g = grupos[cat];
-      const catTotalA = totalPeriodo(g.totalA), catTotalB = totalPeriodo(g.totalB);
-      const blocosCat = blocosDoNivel(g.totalA, g.totalB, totalGeralArrA, totalGeralArrB);
-      blocosCat.push(blocoValoresExp(catTotalA, catTotalB, divSeguro(catTotalA, totalGeralPeriodoAExp), divSeguro(catTotalB, totalGeralPeriodoBExp)));
-      aplicarLinha((ehRelevanteDRE(catTotalA, catTotalB, loc) ? '⚠️ ' : '') + cat, blocosCat, 0, {fillHex: COR_DRE_CAT, bold: true});
+      const catTotaisPeriodo = g.totaisPorVersao.map(arr => totalPeriodo(arr));
+      const blocosCat = blocosNivelExp(g.totaisPorVersao, totalGeralPorVersaoExp);
+      aplicarLinha((ehRelevanteDRE(catTotaisPeriodo[nV - 2], catTotaisPeriodo[nV - 1], loc) ? '⚠️ ' : '') + cat, blocosCat, 0, {fillHex: COR_DRE_CAT, bold: true});
 
       Object.keys(g.canais).forEach(canalNome => {
         if(soRelevantesExp && !relevanciaCanalExp[cat + '|' + canalNome]) return;
         const c = g.canais[canalNome];
-        const canTotalA = totalPeriodo(c.totalA), canTotalB = totalPeriodo(c.totalB);
-        const blocosCan = blocosDoNivel(c.totalA, c.totalB, g.totalA, g.totalB);
-        blocosCan.push(blocoValoresExp(canTotalA, canTotalB, divSeguro(canTotalA, catTotalA), divSeguro(canTotalB, catTotalB)));
-        aplicarLinha((ehRelevanteDRE(canTotalA, canTotalB, loc) ? '⚠️ ' : '') + canalNome, blocosCan, 1, {fillHex: COR_DRE_CAN, italic: true});
+        const canTotaisPeriodo = c.totaisPorVersao.map(arr => totalPeriodo(arr));
+        const blocosCan = blocosNivelExp(c.totaisPorVersao, g.totaisPorVersao);
+        aplicarLinha((ehRelevanteDRE(canTotaisPeriodo[nV - 2], canTotaisPeriodo[nV - 1], loc) ? '⚠️ ' : '') + canalNome, blocosCan, 1, {fillHex: COR_DRE_CAN, italic: true});
 
         c.linhas.forEach(l => {
           if(soRelevantesExp && !relevanciaLinhaExp[cat + '|' + canalNome + '|' + l.id]) return;
-          const linTotalA = totalPeriodo(l.valoresA), linTotalB = totalPeriodo(l.valoresB);
-          const blocosLin = blocosDoNivel(l.valoresA, l.valoresB, c.totalA, c.totalB);
-          blocosLin.push(blocoValoresExp(linTotalA, linTotalB, divSeguro(linTotalA, canTotalA), divSeguro(linTotalB, canTotalB)));
-          aplicarLinha((ehRelevanteDRE(linTotalA, linTotalB, loc) ? '⚠️ ' : '') + l.nome, blocosLin, 2, {});
+          const linTotaisPeriodo = l.valoresPorVersao.map(arr => totalPeriodo(arr));
+          const linTotalUltA = linTotaisPeriodo[nV - 2], linTotalUltB = linTotaisPeriodo[nV - 1];
+          const blocosLin = blocosNivelExp(l.valoresPorVersao, c.totaisPorVersao);
+          aplicarLinha((ehRelevanteDRE(linTotalUltA, linTotalUltB, loc) ? '⚠️ ' : '') + l.nome, blocosLin, 2, {});
 
           const basis = basisDaLinhaDRE(loc, l.id, canalNome);
-          if(basis && Math.abs(linTotalB - linTotalA) >= 0.01){
-            const drill = drilldownFisicoDRE(loc, l.id, canalNome, versaoA, versaoB);
+          if(basis && Math.abs(linTotalUltB - linTotalUltA) >= 0.01){
+            const drill = drilldownFisicoDRE(loc, l.id, canalNome, versoesComparadas[nV - 2], versoesComparadas[nV - 1]);
             if(drill && drill.length){
               drill.forEach(d => {
-                // meses mostram o volume físico (não R$) por versão; o bloco Total
-                // segue mostrando o impacto em R$, que é o resumo já visto na descrição.
-                const blocosDrill = d.porMesA.map((vA, i) => [vA, null, d.porMesB[i], null, d.porMesB[i] - vA]);
+                // meses mostram o volume físico (não R$) por versão, só no ÚLTIMO par (os pares
+                // anteriores ficam em branco); o bloco Total mostra o impacto em R$ desse último par.
+                const blocosDrill = [];
+                d.porMesA.forEach((vA, i) => {
+                  for(let p = 0; p < nV - 2; p++) blocosDrill.push([null, null, null, null, null]);
+                  blocosDrill.push([vA, null, d.porMesB[i], null, d.porMesB[i] - vA]);
+                });
+                for(let p = 0; p < nV - 2; p++) blocosDrill.push([null, null, null, null, null]);
                 blocosDrill.push([null, null, null, null, d.delta]);
                 const sinal = d.deltaFisico > 0 ? '+' : '';
                 const descricaoDrill = d.unidade
-                  ? d.chave + '  (volume no período: ' + formatQtdDRE(d.physA) + ' → ' + formatQtdDRE(d.physB) + ' ' + d.unidade + ', ' + sinal + formatQtdDRE(d.deltaFisico) + ' ' + d.unidade + ')'
+                  ? d.chave + '  (volume no período, último par: ' + formatQtdDRE(d.physA) + ' → ' + formatQtdDRE(d.physB) + ' ' + d.unidade + ', ' + sinal + formatQtdDRE(d.deltaFisico) + ' ' + d.unidade + ')'
                   : d.chave;
                 aplicarLinha(descricaoDrill, blocosDrill, 3, {italic: true});
               });
@@ -3976,27 +3955,21 @@
     });
 
     if(temAjusteMinimo){
-      const blocosAj = blocosDoNivel(ajusteA, ajusteB, totalGeralArrA, totalGeralArrB).map(b => [b[0], null, b[2], null, b[4]]);
-      const ajA = totalPeriodo(ajusteA), ajB = totalPeriodo(ajusteB);
-      blocosAj.push([ajA, null, ajB, null, ajB - ajA]);
+      const blocosAj = blocosNivelExp(ajustesPorVersao, totalGeralPorVersaoExp).map(b => [b[0], null, b[2], null, b[4]]);
       aplicarLinha('Ajuste Faturamento Mínimo', blocosAj, 0, {fillHex: COR_DRE_CAT, bold: true});
+      for(let m = 0; m < 12; m++){ for(let v = 0; v < nV; v++) totalGeralPorVersaoExp[v][m] += ajustesPorVersao[v][m]; }
     }
 
-    const totalGeralA = totalGeralArrA.slice(), totalGeralB = totalGeralArrB.slice();
-    if(temAjusteMinimo) for(let m = 0; m < 12; m++){ totalGeralA[m] += ajusteA[m]; totalGeralB[m] += ajusteB[m]; }
-    const tga = totalPeriodo(totalGeralA), tgb = totalPeriodo(totalGeralB);
-    const blocosTotal = [];
-    for(let m = periodoDe; m <= periodoAte; m++) blocosTotal.push(blocoValoresExp(totalGeralA[m], totalGeralB[m], 1, 1));
-    blocosTotal.push(blocoValoresExp(tga, tgb, 1, 1));
+    const blocosTotal = blocosNivelExp(totalGeralPorVersaoExp, totalGeralPorVersaoExp);
     aplicarLinha('TOTAL COBRADO', blocosTotal, 0, {fillHex: COR_DRE_TOTAL, bold: true});
 
     ws.getColumn(1).width = 8;
     ws.getColumn(2).width = 42;
-    for(let i = 3; i <= 2 + nBlocos * 5; i++) ws.getColumn(i).width = 13;
+    for(let i = 3; i <= 2 + nBlocosLargura * 5; i++) ws.getColumn(i).width = 13;
 
     const buffer = await wb.xlsx.writeBuffer();
     const blob = new Blob([buffer], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-    const nomeArquivo = 'DRE_' + loc + '_' + versaoA.nome.replace(/[^\w.-]+/g, '_') + '_vs_' + versaoB.nome.replace(/[^\w.-]+/g, '_') + '.xlsx';
+    const nomeArquivo = 'DRE_' + loc + '_' + versoesComparadas.map(v => v.nome.replace(/[^\w.-]+/g, '_')).join('_vs_') + '.xlsx';
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = nomeArquivo;
