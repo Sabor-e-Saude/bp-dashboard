@@ -164,6 +164,15 @@
   .dre-down{color:#c0392b; font-weight:700;}
   .dre-neutro{color:var(--muted); font-weight:700;}
   .dre-sub{font-size:10px; color:var(--muted); font-weight:400 !important; text-transform:none !important; letter-spacing:0 !important; margin-top:1px; line-height:1.3; white-space:nowrap;}
+  .dre-alerta td:first-child{box-shadow: inset 3px 0 0 #d99a1f;}
+  .dre-alerta-badge{margin-left:4px;}
+  .dre-driver-item{display:grid; grid-template-columns: 1fr 140px 230px; gap:12px; align-items:center; padding:6px 4px; border-bottom:1px solid var(--border); font-size:12px;}
+  .dre-driver-rotulo{color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .dre-driver-barra-fundo{background:#eef0f2; border-radius:4px; height:10px; overflow:hidden;}
+  .dre-driver-barra{height:100%; border-radius:4px;}
+  .dre-driver-barra.dre-up-bg{background:#0f6e56;}
+  .dre-driver-barra.dre-down-bg{background:#c0392b;}
+  .dre-driver-valor{white-space:nowrap; font-weight:600;}
 
   .card-secao{
     background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
@@ -688,7 +697,23 @@
               <button class="btn-copiar-tabela" style="margin-left:auto;" onclick="window.__copiarTabela('tabela-dre-Extrema', this)">Copiar tabela</button>
               <button class="btn-copiar-tabela" onclick="window.__exportarDREExcel('Extrema')">📊 Exportar Excel formatado</button>
             </div>
-            <div class="secao-nota">Δ (B − A) por mês; a coluna final soma o período selecionado (V.A → V.B) e mostra a % de participação dentro do grupo pai. ▲ verde = custo caiu de A para B · ▼ vermelho = custo subiu · ➖ = sem variação relevante (&lt; R$ 0,01). Clique em ▾/▸ pra colapsar Categoria/Canal, ou na seta ao lado de uma cobrança pra ver qual PD/Família causou aquela variação.</div>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:1rem; flex-wrap:wrap; background:#fff8ea; border:1px solid #f0dca8; border-radius:var(--radius); padding:8px 10px;">
+              <span style="font-size:13px; color:var(--text2);">🔔 Alertar variação ≥</span>
+              <input type="number" id="dre-limiar-pct-Extrema" value="5" min="0" step="0.5" style="width:55px; font-size:13px; padding:4px 6px; border-radius:var(--radius); border:1px solid var(--border);">
+              <span style="font-size:13px; color:var(--text2);">%</span>
+              <span style="font-size:13px; color:var(--text2);">ou ≥ R$</span>
+              <input type="number" id="dre-limiar-rs-Extrema" value="10000" min="0" step="1000" style="width:85px; font-size:13px; padding:4px 6px; border-radius:var(--radius); border:1px solid var(--border);">
+              <label style="font-size:13px; color:var(--text2); display:flex; align-items:center; gap:5px; margin-left:8px;"><input type="checkbox" id="dre-so-relevantes-Extrema"> Mostrar só as relevantes</label>
+            </div>
+            <div style="margin-bottom:1.25rem;">
+              <div style="font-weight:600; font-size:13px; margin-bottom:6px; color:var(--text2);">📊 Waterfall: de V.A até V.B por categoria</div>
+              <div style="height:280px;"><canvas id="chart-waterfall-dre-Extrema"></canvas></div>
+            </div>
+            <div style="margin-bottom:1.25rem;">
+              <div style="font-weight:600; font-size:13px; margin-bottom:6px; color:var(--text2);">🔎 Top drivers da variação (8 maiores)</div>
+              <div id="dre-top-drivers-Extrema"></div>
+            </div>
+            <div class="secao-nota">Δ (B − A) por mês; a coluna final soma o período selecionado (V.A → V.B) e mostra a % de participação dentro do grupo pai. ▲ verde = custo caiu de A para B · ▼ vermelho = custo subiu · ➖ = sem variação relevante (&lt; R$ 0,01). Linhas com ⚠️ passaram do limiar de alerta configurado acima. Clique em ▾/▸ pra colapsar Categoria/Canal, ou na seta ao lado de uma cobrança pra ver qual PD/Família causou aquela variação.</div>
             <div style="overflow-x:auto;"><table id="tabela-dre-Extrema" class="dre-table"><thead></thead><tbody></tbody></table></div>
           </div>
 
@@ -703,7 +728,23 @@
               <button class="btn-copiar-tabela" style="margin-left:auto;" onclick="window.__copiarTabela('tabela-dre-Navegantes', this)">Copiar tabela</button>
               <button class="btn-copiar-tabela" onclick="window.__exportarDREExcel('Navegantes')">📊 Exportar Excel formatado</button>
             </div>
-            <div class="secao-nota">Δ (B − A) por mês; a coluna final soma o período selecionado (V.A → V.B) e mostra a % de participação dentro do grupo pai. ▲ verde = custo caiu de A para B · ▼ vermelho = custo subiu · ➖ = sem variação relevante (&lt; R$ 0,01). Clique em ▾/▸ pra colapsar Categoria/Canal, ou na seta ao lado de uma cobrança pra ver qual PD/Família causou aquela variação.</div>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:1rem; flex-wrap:wrap; background:#fff8ea; border:1px solid #f0dca8; border-radius:var(--radius); padding:8px 10px;">
+              <span style="font-size:13px; color:var(--text2);">🔔 Alertar variação ≥</span>
+              <input type="number" id="dre-limiar-pct-Navegantes" value="5" min="0" step="0.5" style="width:55px; font-size:13px; padding:4px 6px; border-radius:var(--radius); border:1px solid var(--border);">
+              <span style="font-size:13px; color:var(--text2);">%</span>
+              <span style="font-size:13px; color:var(--text2);">ou ≥ R$</span>
+              <input type="number" id="dre-limiar-rs-Navegantes" value="10000" min="0" step="1000" style="width:85px; font-size:13px; padding:4px 6px; border-radius:var(--radius); border:1px solid var(--border);">
+              <label style="font-size:13px; color:var(--text2); display:flex; align-items:center; gap:5px; margin-left:8px;"><input type="checkbox" id="dre-so-relevantes-Navegantes"> Mostrar só as relevantes</label>
+            </div>
+            <div style="margin-bottom:1.25rem;">
+              <div style="font-weight:600; font-size:13px; margin-bottom:6px; color:var(--text2);">📊 Waterfall: de V.A até V.B por categoria</div>
+              <div style="height:280px;"><canvas id="chart-waterfall-dre-Navegantes"></canvas></div>
+            </div>
+            <div style="margin-bottom:1.25rem;">
+              <div style="font-weight:600; font-size:13px; margin-bottom:6px; color:var(--text2);">🔎 Top drivers da variação (8 maiores)</div>
+              <div id="dre-top-drivers-Navegantes"></div>
+            </div>
+            <div class="secao-nota">Δ (B − A) por mês; a coluna final soma o período selecionado (V.A → V.B) e mostra a % de participação dentro do grupo pai. ▲ verde = custo caiu de A para B · ▼ vermelho = custo subiu · ➖ = sem variação relevante (&lt; R$ 0,01). Linhas com ⚠️ passaram do limiar de alerta configurado acima. Clique em ▾/▸ pra colapsar Categoria/Canal, ou na seta ao lado de uma cobrança pra ver qual PD/Família causou aquela variação.</div>
             <div style="overflow-x:auto;"><table id="tabela-dre-Navegantes" class="dre-table"><thead></thead><tbody></tbody></table></div>
           </div>
         </div>
@@ -3238,6 +3279,24 @@
   const dreColapsados = {Extrema: new Set(), Navegantes: new Set()};
   const dreDrillAbertos = {Extrema: new Set(), Navegantes: new Set()};
   let dreGruposConhecidos = {Extrema: [], Navegantes: []};
+  // limiar de alerta de variação, configurável por CD: uma linha/canal/categoria
+  // é "relevante" se passar do % OU do R$ (o que disparar primeiro).
+  const dreLimiar = {
+    Extrema: {pct: 5, rs: 10000, soRelevantes: false},
+    Navegantes: {pct: 5, rs: 10000, soRelevantes: false}
+  };
+  const chartsWaterfallDRE = {Extrema: null, Navegantes: null};
+  function ehRelevanteDRE(valorA, valorB, loc){
+    const delta = valorB - valorA;
+    if(Math.abs(delta) < 0.01) return false;
+    const lim = dreLimiar[loc];
+    if(Math.abs(delta) >= lim.rs) return true;
+    const pctMudanca = Math.abs(valorA) > 0.01 ? Math.abs(delta / valorA) : Infinity;
+    return pctMudanca >= (lim.pct / 100);
+  }
+  function seloAlertaDRE(relevante){
+    return relevante ? ' <span class="dre-alerta-badge" title="Passou do limiar de alerta configurado">⚠️</span>' : '';
+  }
 
   function preencherSelectsDRE(loc){
     const selA = document.getElementById('select-dre-a-' + loc);
@@ -3255,6 +3314,16 @@
       selA.dataset.wired = '1';
       selA.addEventListener('change', () => { idx.a = Number(selA.value); renderDRE(loc); });
       selB.addEventListener('change', () => { idx.b = Number(selB.value); renderDRE(loc); });
+    }
+    const inPct = document.getElementById('dre-limiar-pct-' + loc);
+    const inRs = document.getElementById('dre-limiar-rs-' + loc);
+    const chkSo = document.getElementById('dre-so-relevantes-' + loc);
+    if(inPct && !inPct.dataset.wired){
+      inPct.dataset.wired = '1'; inRs.dataset.wired = '1'; chkSo.dataset.wired = '1';
+      inPct.value = dreLimiar[loc].pct; inRs.value = dreLimiar[loc].rs; chkSo.checked = dreLimiar[loc].soRelevantes;
+      inPct.addEventListener('change', () => { dreLimiar[loc].pct = Number(inPct.value) || 0; renderDRE(loc); });
+      inRs.addEventListener('change', () => { dreLimiar[loc].rs = Number(inRs.value) || 0; renderDRE(loc); });
+      chkSo.addEventListener('change', () => { dreLimiar[loc].soRelevantes = chkSo.checked; renderDRE(loc); });
     }
   }
 
@@ -3474,6 +3543,44 @@
         for(let m = 0; m < 12; m++){ c.totalA[m] += valoresA[m]; c.totalB[m] += valoresB[m]; g.totalA[m] += valoresA[m]; g.totalB[m] += valoresB[m]; }
       });
 
+      // "Top drivers": lista achatada de todas as cobranças (Categoria › Canal › Nome)
+      // com seu Δ no período, ranqueada pra mostrar rapidinho quem mais pesou na variação
+      // total, sem precisar abrir categoria por categoria.
+      const elTopDrivers = document.getElementById('dre-top-drivers-' + loc);
+      if(elTopDrivers){
+        const todasLinhasFlat = [];
+        Object.keys(grupos).forEach(cat => {
+          const g = grupos[cat];
+          Object.keys(g.canais).forEach(canalNome => {
+            g.canais[canalNome].linhas.forEach(l => {
+              const a = totalPeriodo(l.valoresA), b = totalPeriodo(l.valoresB);
+              const delta = b - a;
+              if(Math.abs(delta) < 0.01) return;
+              todasLinhasFlat.push({cat, canal: canalNome, nome: l.nome, delta});
+            });
+          });
+        });
+        const somaAbsTotal = todasLinhasFlat.reduce((s, x) => s + Math.abs(x.delta), 0);
+        todasLinhasFlat.sort((x, y) => Math.abs(y.delta) - Math.abs(x.delta));
+        const topN = todasLinhasFlat.slice(0, 8);
+        const maiorAbs = topN.length ? Math.abs(topN[0].delta) : 0;
+        if(topN.length){
+          elTopDrivers.innerHTML = topN.map(item => {
+            const corTxt = item.delta < 0 ? 'dre-up' : 'dre-down';
+            const corBg = item.delta < 0 ? 'dre-up-bg' : 'dre-down-bg';
+            const pctDoTotal = somaAbsTotal > 0 ? Math.abs(item.delta) / somaAbsTotal : 0;
+            const larguraBarra = maiorAbs > 0 ? Math.round(Math.abs(item.delta) / maiorAbs * 100) : 0;
+            return '<div class="dre-driver-item">' +
+              '<div class="dre-driver-rotulo" title="' + item.cat + ' › ' + item.canal + ' › ' + item.nome + '">' + item.cat + ' › ' + item.canal + ' › ' + item.nome + '</div>' +
+              '<div class="dre-driver-barra-fundo"><div class="dre-driver-barra ' + corBg + '" style="width:' + larguraBarra + '%;"></div></div>' +
+              '<div class="dre-driver-valor ' + corTxt + '">' + seloVariacaoDRE(item.delta) + ' ' + formatR$(Math.abs(item.delta)) + ' <span class="dre-sub">(' + formatPctDRE(pctDoTotal) + ' da variação total)</span></div>' +
+              '</div>';
+          }).join('');
+        } else {
+          elTopDrivers.innerHTML = '<div class="secao-nota">Nenhuma variação relevante entre as duas versões nesse período.</div>';
+        }
+      }
+
       // ajuste de Faturamento Mínimo (só entra se ele realmente pesou em algum mês, em A ou B)
       let temAjusteMinimo = false;
       const ajusteA = Array(12).fill(0), ajusteB = Array(12).fill(0);
@@ -3493,39 +3600,122 @@
       const totalGeralA = Array(12).fill(0), totalGeralB = Array(12).fill(0);
       const gruposConhecidos = [];
       let linhasHtml = '';
+      const soRelevantes = dreLimiar[loc].soRelevantes;
 
       // pré-passo: soma o total geral (todas categorias) ANTES de montar as linhas,
       // pra % de cada categoria ser sobre o total real, não sobre ela mesma.
       nomesCategorias.forEach(cat => { for(let m = 0; m < 12; m++){ totalGeralA[m] += grupos[cat].totalA[m]; totalGeralB[m] += grupos[cat].totalB[m]; } });
       const totalGeralPeriodoA = totalPeriodo(totalGeralA), totalGeralPeriodoB = totalPeriodo(totalGeralB);
 
+      // waterfall: barra flutuante do total V.A até o total V.B, passando por cada
+      // categoria (e o ajuste de mínimo, se houver) na ordem em que elas entram na soma.
+      const canvasWf = document.getElementById('chart-waterfall-dre-' + loc);
+      if(canvasWf && typeof Chart !== 'undefined'){
+        const labelsWf = ['V.' + versaoA.nome];
+        const dataWf = [[0, totalGeralPeriodoA]];
+        const coresWf = ['#7a8896'];
+        let cursorWf = totalGeralPeriodoA;
+        nomesCategorias.forEach(cat => {
+          const g = grupos[cat];
+          const a = totalPeriodo(g.totalA), b = totalPeriodo(g.totalB);
+          const delta = b - a;
+          if(Math.abs(delta) < 0.01) return;
+          const ini = cursorWf, fim = cursorWf + delta;
+          dataWf.push([Math.min(ini, fim), Math.max(ini, fim)]);
+          labelsWf.push(cat);
+          coresWf.push(delta < 0 ? '#0f6e56' : '#c0392b');
+          cursorWf = fim;
+        });
+        if(temAjusteMinimo){
+          const ajA = totalPeriodo(ajusteA), ajB = totalPeriodo(ajusteB);
+          const deltaAj = ajB - ajA;
+          if(Math.abs(deltaAj) >= 0.01){
+            const ini = cursorWf, fim = cursorWf + deltaAj;
+            dataWf.push([Math.min(ini, fim), Math.max(ini, fim)]);
+            labelsWf.push('Ajuste Mínimo');
+            coresWf.push(deltaAj < 0 ? '#0f6e56' : '#c0392b');
+            cursorWf = fim;
+          }
+        }
+        labelsWf.push('V.' + versaoB.nome);
+        dataWf.push([0, totalGeralPeriodoB]);
+        coresWf.push('#7a8896');
+
+        if(chartsWaterfallDRE[loc]) chartsWaterfallDRE[loc].destroy();
+        chartsWaterfallDRE[loc] = new Chart(canvasWf, {
+          type: 'bar',
+          data: {labels: labelsWf, datasets: [{data: dataWf, backgroundColor: coresWf, borderRadius: 3}]},
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: {display: false},
+              tooltip: {callbacks: {label: c => {
+                const ini = c.raw[0], fim = c.raw[1];
+                return formatR$(ini) + ' → ' + formatR$(fim) + '  (Δ ' + formatR$(fim - ini) + ')';
+              }}}
+            },
+            scales: {
+              y: {ticks: {callback: v => (v / 1000).toLocaleString('pt-BR') + 'k'}, grid: {color: 'rgba(137,135,129,0.15)'}},
+              x: {grid: {display: false}, ticks: {autoSkip: false, maxRotation: 30, minRotation: 0}}
+            }
+          }
+        });
+      }
+
+      // pré-passo de relevância (bottom-up): uma categoria/canal é "relevante" se ela
+      // mesma passar do limiar OU se algum descendente passar — decide o que o filtro
+      // "só relevantes" esconde, sem sumir com um pai que tem um filho relevante lá embaixo.
+      const relevanciaCanal = {}, relevanciaLinha = {}, relevanciaCategoria = {};
+      nomesCategorias.forEach(cat => {
+        const g = grupos[cat];
+        let catTemRelevante = ehRelevanteDRE(totalPeriodo(g.totalA), totalPeriodo(g.totalB), loc);
+        Object.keys(g.canais).forEach(canalNome => {
+          const c = g.canais[canalNome];
+          let canTemRelevante = ehRelevanteDRE(totalPeriodo(c.totalA), totalPeriodo(c.totalB), loc);
+          c.linhas.forEach(l => {
+            const lRel = ehRelevanteDRE(totalPeriodo(l.valoresA), totalPeriodo(l.valoresB), loc);
+            relevanciaLinha[cat + '|' + canalNome + '|' + l.id] = lRel;
+            if(lRel) canTemRelevante = true;
+          });
+          relevanciaCanal[cat + '|' + canalNome] = canTemRelevante;
+          if(canTemRelevante) catTemRelevante = true;
+        });
+        relevanciaCategoria[cat] = catTemRelevante;
+      });
+
       nomesCategorias.forEach((cat, catIdx) => {
+        if(soRelevantes && !relevanciaCategoria[cat]) return;
         const g = grupos[cat];
         const catId = loc + '|cat|' + catIdx;
         gruposConhecidos.push(catId);
         const catColapsada = dreColapsados[loc].has(catId);
         const catTotalA = totalPeriodo(g.totalA), catTotalB = totalPeriodo(g.totalB);
+        const catPropRelevante = ehRelevanteDRE(catTotalA, catTotalB, loc);
 
         const celulasMesCat = [];
         for(let m = periodoDe; m <= periodoAte; m++) celulasMesCat.push(blocoDRE(g.totalA[m], g.totalB[m], divSeguro(g.totalA[m], totalGeralA[m]), divSeguro(g.totalB[m], totalGeralB[m])));
-        linhasHtml += '<tr class="dre-cat-row"><td><span class="dre-toggle" onclick="window.__toggleDreGrupo(\'' + loc + '\',\'' + catId + '\')">' + (catColapsada ? '▸' : '▾') + '</span> ' + cat + '</td>' +
+        linhasHtml += '<tr class="dre-cat-row' + (catPropRelevante ? ' dre-alerta' : '') + '"><td><span class="dre-toggle" onclick="window.__toggleDreGrupo(\'' + loc + '\',\'' + catId + '\')">' + (catColapsada ? '▸' : '▾') + '</span> ' + cat + seloAlertaDRE(catPropRelevante) + '</td>' +
           celulasMesCat.join('') + blocoDRE(catTotalA, catTotalB, divSeguro(catTotalA, totalGeralPeriodoA), divSeguro(catTotalB, totalGeralPeriodoB)) + '</tr>';
 
         const nomesCanais = Object.keys(g.canais).sort((x, y) => Math.abs(totalPeriodo(g.canais[y].totalB) - totalPeriodo(g.canais[y].totalA)) - Math.abs(totalPeriodo(g.canais[x].totalB) - totalPeriodo(g.canais[x].totalA)));
         nomesCanais.forEach((canalNome, canIdx) => {
+          if(soRelevantes && !relevanciaCanal[cat + '|' + canalNome]) return;
           const c = g.canais[canalNome];
           const canId = catId + '|can|' + canIdx;
           gruposConhecidos.push(canId);
           const canColapsada = dreColapsados[loc].has(canId);
           const canTotalA = totalPeriodo(c.totalA), canTotalB = totalPeriodo(c.totalB);
           const pctCanA = divSeguro(canTotalA, catTotalA), pctCanB = divSeguro(canTotalB, catTotalB);
+          const canPropRelevante = ehRelevanteDRE(canTotalA, canTotalB, loc);
           const celulasMesCan = [];
           for(let m = periodoDe; m <= periodoAte; m++) celulasMesCan.push(blocoDRE(c.totalA[m], c.totalB[m], divSeguro(c.totalA[m], g.totalA[m]), divSeguro(c.totalB[m], g.totalB[m])));
-          linhasHtml += '<tr class="dre-canal-row' + (catColapsada ? ' dre-oculto' : '') + '"><td><span class="dre-toggle" onclick="window.__toggleDreGrupo(\'' + loc + '\',\'' + canId + '\')">' + (canColapsada ? '▸' : '▾') + '</span> ' + canalNome + '</td>' +
+          linhasHtml += '<tr class="dre-canal-row' + (catColapsada ? ' dre-oculto' : '') + (canPropRelevante ? ' dre-alerta' : '') + '"><td><span class="dre-toggle" onclick="window.__toggleDreGrupo(\'' + loc + '\',\'' + canId + '\')">' + (canColapsada ? '▸' : '▾') + '</span> ' + canalNome + seloAlertaDRE(canPropRelevante) + '</td>' +
             celulasMesCan.join('') + blocoDRE(canTotalA, canTotalB, pctCanA, pctCanB) + '</tr>';
 
           c.linhas.sort((x, y) => Math.abs(totalPeriodo(y.valoresB) - totalPeriodo(y.valoresA)) - Math.abs(totalPeriodo(x.valoresB) - totalPeriodo(x.valoresA)));
           c.linhas.forEach(l => {
+            const lRelevante = relevanciaLinha[cat + '|' + canalNome + '|' + l.id];
+            if(soRelevantes && !lRelevante) return;
             const linTotalA = totalPeriodo(l.valoresA), linTotalB = totalPeriodo(l.valoresB);
             const pctLinA = divSeguro(linTotalA, canTotalA), pctLinB = divSeguro(linTotalB, canTotalB);
             const celulasMesLin = [];
@@ -3538,7 +3728,7 @@
             const toggleDrill = temDrill
               ? '<span class="dre-toggle dre-toggle-drill" title="Ver a causa física (PD/Família) — clique pra expandir" onclick="window.__toggleDreDrilldown(\'' + loc + '\',\'' + lineKey + '\')">' + (drillAberto ? '▾ causa física' : '▸ causa física') + '</span> '
               : '';
-            linhasHtml += '<tr class="dre-linha-row' + (oculta ? ' dre-oculto' : '') + '"><td class="dre-linha-nome">' + l.nome + (temDrill ? '<br>' + toggleDrill : '') + '</td>' +
+            linhasHtml += '<tr class="dre-linha-row' + (oculta ? ' dre-oculto' : '') + (lRelevante ? ' dre-alerta' : '') + '"><td class="dre-linha-nome">' + l.nome + seloAlertaDRE(lRelevante) + (temDrill ? '<br>' + toggleDrill : '') + '</td>' +
               celulasMesLin.join('') + blocoDRE(linTotalA, linTotalB, pctLinA, pctLinB) + '</tr>';
 
             if(temDrill && drillAberto){
@@ -3720,25 +3910,49 @@
       return blocos;
     }
 
+    // mesmo pré-passo de relevância do simulador, pra respeitar o filtro "só relevantes"
+    // também na exportação (senão o Excel sairia com linhas que a tela já escondeu).
+    const soRelevantesExp = dreLimiar[loc].soRelevantes;
+    const relevanciaCanalExp = {}, relevanciaLinhaExp = {}, relevanciaCategoriaExp = {};
     nomesCategorias.forEach(cat => {
+      const g = grupos[cat];
+      let catTemRelevante = ehRelevanteDRE(totalPeriodo(g.totalA), totalPeriodo(g.totalB), loc);
+      Object.keys(g.canais).forEach(canalNome => {
+        const c = g.canais[canalNome];
+        let canTemRelevante = ehRelevanteDRE(totalPeriodo(c.totalA), totalPeriodo(c.totalB), loc);
+        c.linhas.forEach(l => {
+          const lRel = ehRelevanteDRE(totalPeriodo(l.valoresA), totalPeriodo(l.valoresB), loc);
+          relevanciaLinhaExp[cat + '|' + canalNome + '|' + l.id] = lRel;
+          if(lRel) canTemRelevante = true;
+        });
+        relevanciaCanalExp[cat + '|' + canalNome] = canTemRelevante;
+        if(canTemRelevante) catTemRelevante = true;
+      });
+      relevanciaCategoriaExp[cat] = catTemRelevante;
+    });
+
+    nomesCategorias.forEach(cat => {
+      if(soRelevantesExp && !relevanciaCategoriaExp[cat]) return;
       const g = grupos[cat];
       const catTotalA = totalPeriodo(g.totalA), catTotalB = totalPeriodo(g.totalB);
       const blocosCat = blocosDoNivel(g.totalA, g.totalB, totalGeralArrA, totalGeralArrB);
       blocosCat.push(blocoValoresExp(catTotalA, catTotalB, divSeguro(catTotalA, totalGeralPeriodoAExp), divSeguro(catTotalB, totalGeralPeriodoBExp)));
-      aplicarLinha(cat, blocosCat, 0, {fillHex: COR_DRE_CAT, bold: true});
+      aplicarLinha((ehRelevanteDRE(catTotalA, catTotalB, loc) ? '⚠️ ' : '') + cat, blocosCat, 0, {fillHex: COR_DRE_CAT, bold: true});
 
       Object.keys(g.canais).forEach(canalNome => {
+        if(soRelevantesExp && !relevanciaCanalExp[cat + '|' + canalNome]) return;
         const c = g.canais[canalNome];
         const canTotalA = totalPeriodo(c.totalA), canTotalB = totalPeriodo(c.totalB);
         const blocosCan = blocosDoNivel(c.totalA, c.totalB, g.totalA, g.totalB);
         blocosCan.push(blocoValoresExp(canTotalA, canTotalB, divSeguro(canTotalA, catTotalA), divSeguro(canTotalB, catTotalB)));
-        aplicarLinha(canalNome, blocosCan, 1, {fillHex: COR_DRE_CAN, italic: true});
+        aplicarLinha((ehRelevanteDRE(canTotalA, canTotalB, loc) ? '⚠️ ' : '') + canalNome, blocosCan, 1, {fillHex: COR_DRE_CAN, italic: true});
 
         c.linhas.forEach(l => {
+          if(soRelevantesExp && !relevanciaLinhaExp[cat + '|' + canalNome + '|' + l.id]) return;
           const linTotalA = totalPeriodo(l.valoresA), linTotalB = totalPeriodo(l.valoresB);
           const blocosLin = blocosDoNivel(l.valoresA, l.valoresB, c.totalA, c.totalB);
           blocosLin.push(blocoValoresExp(linTotalA, linTotalB, divSeguro(linTotalA, canTotalA), divSeguro(linTotalB, canTotalB)));
-          aplicarLinha(l.nome, blocosLin, 2, {});
+          aplicarLinha((ehRelevanteDRE(linTotalA, linTotalB, loc) ? '⚠️ ' : '') + l.nome, blocosLin, 2, {});
 
           const basis = basisDaLinhaDRE(loc, l.id, canalNome);
           if(basis && Math.abs(linTotalB - linTotalA) >= 0.01){
