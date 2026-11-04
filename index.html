@@ -301,6 +301,8 @@
       <aside class="sidebar">
         <div class="sidebar-toolbar" id="sidebar-toolbar" style="display:none;">
           <button class="sidebar-toolbar-btn" id="btn-abrir-versoes">📁 Versões <span class="badge" id="badge-versoes">0</span></button>
+          <button class="sidebar-toolbar-btn" id="btn-abrir-visoes">⭐ Visões salvas</button>
+          <select id="select-visao-rapida" class="sidebar-toolbar-btn" style="width:100%;" title="Aplicar uma visão salva com um clique"><option value="">⭐ Aplicar visão salva...</option></select>
           <button class="sidebar-toolbar-btn" id="btn-abrir-exportar">⬇️ Exportar</button>
           <button class="sidebar-toolbar-btn" id="btn-abrir-capacidades">📏 Capacidades</button>
         </div>
@@ -514,6 +516,12 @@
               <tbody></tbody>
             </table></div>
 
+            <details class="secao">
+              <summary>Custos mensais com "Outros custos" detalhado<button class="btn-copiar-tabela" style="margin-left:auto;" onclick="event.preventDefault(); event.stopPropagation(); window.__copiarTabela('tabela-custos-outros-Extrema', this)">Copiar tabela</button></summary>
+              <div class="secao-nota">A mesma tabela acima, sem alterá-la, com a coluna "Outros custos" aberta em uma coluna por serviço (só os que têm valor no período). A soma dessas colunas é o total de Outros custos.</div>
+              <div style="overflow-x:auto;"><table id="tabela-custos-outros-Extrema"><thead></thead><tbody></tbody></table></div>
+            </details>
+
 
             <div class="card-secao">
               <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:0.75rem;">
@@ -622,6 +630,12 @@
               <thead><tr><th>Mês</th><th>Porta Palete</th><th>Bloco</th><th>Recebimento</th><th>Expedição</th><th>Ad-Valorem</th><th>GRIS</th><th>Transferência</th><th>Outros custos</th><th>Eventos</th><th>Total variável</th><th>Total cobrado</th></tr></thead>
               <tbody></tbody>
             </table></div>
+
+            <details class="secao">
+              <summary>Custos mensais com "Outros custos" detalhado<button class="btn-copiar-tabela" style="margin-left:auto;" onclick="event.preventDefault(); event.stopPropagation(); window.__copiarTabela('tabela-custos-outros-Navegantes', this)">Copiar tabela</button></summary>
+              <div class="secao-nota">A mesma tabela acima, sem alterá-la, com a coluna "Outros custos" aberta em uma coluna por serviço (só os que têm valor no período). A soma dessas colunas é o total de Outros custos.</div>
+              <div style="overflow-x:auto;"><table id="tabela-custos-outros-Navegantes"><thead></thead><tbody></tbody></table></div>
+            </details>
 
 
             <div class="card-secao">
@@ -1284,13 +1298,14 @@
   function abrirModalVersoes(){
     devolverConteudosMovidos();
     const box = document.getElementById('modal-box');
-    box.style.maxWidth = '';
+    box.style.maxWidth = 'min(1280px, 96vw)';
+    box.style.maxHeight = '90vh';
     box.dataset.tipo = 'versoes';
     box.innerHTML = '<button class="modal-close-btn" onclick="window.__fecharModal()">&times;</button>' +
       '<h3>Versões do BP27 carregadas nesta sessão</h3>' +
       conteudoListaVersoes() +
       '<h3 style="margin-top:1.25rem;">Versões de custos</h3>' +
-      '<div class="secao-nota" style="margin-bottom:6px;">Cada arquivo de custos enviado vira uma versão Nas comparações (Custos e DRE) você escolhe a versão de custos de cada lado.</div>' +
+      '<div class="secao-nota" style="margin-bottom:6px;">Cada arquivo de custos enviado vira uma versão. Nas comparações (Custos e DRE) você escolhe a versão de custos de cada lado.</div>' +
       conteudoListaVersoesCustos();
     document.getElementById('modal-overlay').classList.add('aberto');
   }
@@ -1344,6 +1359,8 @@
 
   document.getElementById('btn-abrir-upload').addEventListener('click', abrirModalUpload);
   document.getElementById('btn-abrir-versoes').addEventListener('click', abrirModalVersoes);
+  document.getElementById('btn-abrir-visoes').addEventListener('click', abrirModalVisoes);
+  document.getElementById('select-visao-rapida').addEventListener('change', e => { if(e.target.value) usarVisao(e.target.value); e.target.value = ''; });
   document.getElementById('btn-abrir-exportar').addEventListener('click', abrirModalExportar);
   document.getElementById('btn-abrir-capacidades').addEventListener('click', abrirModalCapacidades);
   document.getElementById('modal-overlay').addEventListener('click', e => {
@@ -3372,7 +3389,46 @@
         tbody.appendChild(tr);
       });
       renderDetalheServicosUI(loc);
+      renderCustosOutrosDetalhado(loc);
       renderResumoCategoriaCanal(loc);
+    });
+  }
+
+  // tabela mensal igual à principal, com "Outros custos" aberto em uma coluna por serviço
+  function renderCustosOutrosDetalhado(loc){
+    const tabela = document.getElementById('tabela-custos-outros-' + loc);
+    const base = document.getElementById('tabela-custos-' + loc);
+    if(!tabela || !base) return;
+    const thead = tabela.querySelector('thead'), tbody = tabela.querySelector('tbody');
+    const ths = Array.from(base.querySelectorAll('thead th')).map(t => t.textContent);
+    const iOut = ths.findIndex(t => /outros custos/i.test(t));
+    const rows = Array.from(base.querySelectorAll('tbody tr'));
+    if(iOut < 0 || !rows.length){ thead.innerHTML = ''; tbody.innerHTML = ''; return; }
+    const meses = rows.map(tr => MESES.indexOf(tr.cells[0].textContent));
+    const servs = computeDetalheCompleto(loc).filter(l => l.origem === 'servico')
+      .filter(l => meses.reduce((s, m) => s + Math.abs(l.valoresPorMes[m] || 0), 0) >= 0.5);
+    const contagem = {};
+    servs.forEach(l => { contagem[l.nome] = (contagem[l.nome] || 0) + 1; });
+    const cols = servs.map(l => {
+      let nome = l.nome;
+      if(contagem[l.nome] > 1){
+        const s = (servicosManuais[loc] || []).find(x => x.id === l.servId);
+        if(s) nome += ' (' + formatR$(s.valorUnitario) + ')';
+      }
+      return {nome, valores: l.valoresPorMes};
+    });
+    thead.innerHTML = '<tr>' + ths.slice(0, iOut).map(t => '<th>' + t + '</th>').join('') +
+      cols.map(c => '<th>' + String(c.nome).replace(/</g, '&lt;') + '</th>').join('') +
+      '<th>Outros custos (total)</th>' + ths.slice(iOut + 1).map(t => '<th>' + t + '</th>').join('') + '</tr>';
+    tbody.innerHTML = '';
+    rows.forEach((tr, ri) => {
+      const cel = Array.from(tr.cells).map(c => c.outerHTML);
+      const m = meses[ri];
+      const nova = document.createElement('tr');
+      nova.innerHTML = cel.slice(0, iOut).join('') +
+        cols.map(c => '<td>' + formatR$(c.valores[m]) + '</td>').join('') +
+        cel[iOut].replace('<td>', '<td style="font-weight:600;">') + cel.slice(iOut + 1).join('');
+      tbody.appendChild(nova);
     });
   }
 
@@ -4622,6 +4678,8 @@
     } else {
       versoesCustos = []; custosAtivoIdx = -1;
     }
+    mesclarPresets(dados.presetsVisao);
+    renderSeletorVisoes();
     renderSeletorCustos();
     capacidades = dados.capacidades || {Extrema: {m2:0,m2Cntr:0,m3:0,pp:0,containers:0}, Navegantes: {m2:0,m2Cntr:0,m3:0,pp:0,containers:0}};
     renderCapacidadesUI();
@@ -4663,12 +4721,227 @@
     }
   }
 
+  // ------------------------------------------------------------------
+  // VISÕES SALVAS (presets): guardam flow ativo, versão de custos, reajustes ligados/desligados,
+  // todos os filtros, período, métrica e as seleções dos comparativos (Custos e DRE).
+  // Ficam no navegador e vão junto do "Publicar dados atuais para todos". Versões de flow/custos
+  // são guardadas pelo NOME (os índices mudam quando se remove/reenvia arquivo).
+  // Aplicar redefine tudo de uma vez e renderiza UMA vez (sem refazer filtro a filtro).
+  // ------------------------------------------------------------------
+  const PRESETS_LS_KEY = 'bp27_presets_visao';
+  function lerPresetsLocal(){
+    try{ const r = localStorage.getItem(PRESETS_LS_KEY); const a = r ? JSON.parse(r) : []; return Array.isArray(a) ? a : []; }catch(e){ return []; }
+  }
+  let presetsVisao = lerPresetsLocal();
+  function salvarPresetsLocal(){ try{ localStorage.setItem(PRESETS_LS_KEY, JSON.stringify(presetsVisao)); }catch(e){ console.warn('presets: não salvou local', e); } }
+  function mesclarPresets(doServidor){
+    const lista = Array.isArray(doServidor) ? doServidor : Object.values(doServidor || {});
+    const porId = {};
+    presetsVisao.forEach(p => { porId[p.id] = p; });
+    lista.forEach(p => { if(p && p.id) porId[p.id] = p; }); // o publicado vence em caso de mesmo id
+    presetsVisao = Object.values(porId);
+    salvarPresetsLocal();
+  }
+
+  function listaMarcada(containerId, arr){
+    // null = "todos" (não quebra se entrarem PDs/famílias novos depois)
+    const total = document.querySelectorAll('#' + containerId + ' input').length;
+    return (total && arr.length === total) ? null : arr.slice();
+  }
+  function nomeFlowPorIdx(i){ return versoesFlow[i] ? versoesFlow[i].nome : null; }
+  function nomeCustosPorIdx(i){ return versoesCustos[i] ? versoesCustos[i].nome : null; }
+
+  function capturarVisao(){
+    sincronizarCustosAtivo();
+    const d = {
+      flow: nomeFlowPorIdx(versaoAtivaIndex),
+      custos: nomeCustosPorIdx(custosAtivoIdx),
+      reajustesOff: cloneJSON(reajustesOff),
+      filtros: {
+        localidade: filtros.localidade.slice(), canal: filtros.canal.slice(), blocado: filtros.blocado.slice(),
+        producao: listaMarcada('grupo-producao', filtros.producao),
+        pd: listaMarcada('grupo-pd', filtros.pd),
+        familia: listaMarcada('grupo-familia', filtros.familia)
+      },
+      periodo: [periodoDe, periodoAte], operacao: operacaoAtual, metrica: metricaAtual, picoDecendio: picoDecendioTipo,
+      comparativoCustos: {}, dre: {}
+    };
+    ['Extrema','Navegantes'].forEach(loc => {
+      const c = comparativoCustosIdx[loc];
+      if(c.a >= 0 && c.b >= 0 && c.ca >= 0 && c.cb >= 0){
+        d.comparativoCustos[loc] = {a: nomeFlowPorIdx(c.a), b: nomeFlowPorIdx(c.b), ca: nomeCustosPorIdx(c.ca), cb: nomeCustosPorIdx(c.cb),
+          offA: offEfetivo(c.offA, c.ca, loc).slice(), offB: offEfetivo(c.offB, c.cb, loc).slice()};
+      }
+      const o = dreVersaoIdx[loc];
+      if(o.ids.length >= 2 && o.ids.every(i => i >= 0)){
+        normalizarDreCustos(o);
+        d.dre[loc] = {flows: o.ids.map(nomeFlowPorIdx), custos: o.custos.map(nomeCustosPorIdx),
+          off: o.ids.map((_, s) => offEfetivo(o.off[s], o.custos[s], loc).slice())};
+      }
+    });
+    return d;
+  }
+
+  function resumoVisao(d){
+    const f = d.filtros || {};
+    const n = (a) => a === null ? 'todos' : (a || []).length;
+    const off = ((d.reajustesOff && d.reajustesOff.Extrema) || []).length + ((d.reajustesOff && d.reajustesOff.Navegantes) || []).length;
+    return 'Flow: ' + (d.flow || '—') + ' · Custos: ' + (d.custos || '—') +
+      (off ? ' · ' + off + ' reajuste(s) desligado(s)' : '') +
+      ' · ' + MESES[(d.periodo || [0, 11])[0]] + '–' + MESES[(d.periodo || [0, 11])[1]] +
+      ' · CDs: ' + ((f.localidade || []).join('/') || 'nenhum') + ' · canais: ' + ((f.canal || []).length) +
+      ' · PD: ' + n(f.pd) + ' · Família: ' + n(f.familia) + ' · Produção: ' + n(f.producao);
+  }
+
+  function marcarLista(containerId, arr, valores){
+    document.querySelectorAll('#' + containerId + ' input').forEach(cb => { cb.checked = (valores === null || valores === undefined) ? true : valores.includes(cb.dataset.value); });
+    atualizarFiltroLista(containerId, arr);
+  }
+
+  function aplicarVisao(preset){
+    const d = preset.dados, avisos = [];
+    const idxFlow = nome => versoesFlow.findIndex(v => v.nome === nome);
+    const idxCustos = nome => versoesCustos.findIndex(v => v.nome === nome);
+
+    // flow e custos
+    const fi = idxFlow(d.flow);
+    if(fi >= 0) versaoAtivaIndex = fi; else if(d.flow) avisos.push('flow "' + d.flow + '"');
+    const ci = idxCustos(d.custos);
+    if(ci >= 0){
+      if(ci !== custosAtivoIdx){ sincronizarCustosAtivo(); custosAtivoIdx = ci; aplicarEstadoCustos(versoesCustos[ci]); }
+      reajustesOff = normalizarPorLoc(d.reajustesOff);
+      sincronizarCustosAtivo();
+    } else if(d.custos) avisos.push('custos "' + d.custos + '"');
+
+    // filtros (tudo de uma vez, sem render intermediário)
+    const f = d.filtros || {};
+    marcarLista('grupo-localidade', filtros.localidade, f.localidade);
+    marcarLista('grupo-canal', filtros.canal, f.canal);
+    marcarLista('grupo-blocado', filtros.blocado, f.blocado);
+    marcarLista('grupo-producao', filtros.producao, f.producao);
+    marcarLista('grupo-pd', filtros.pd, f.pd);
+    atualizarFamiliasPorPD();          // as famílias dependem dos PDs marcados
+    marcarLista('grupo-familia', filtros.familia, f.familia);
+
+    // período, operação, métrica
+    if(d.periodo){
+      periodoDe = d.periodo[0]; periodoAte = d.periodo[1];
+      selPeriodoDe.value = periodoDe; selPeriodoAte.value = periodoAte;
+    }
+    if(d.operacao && !compararAtivo){ operacaoAtual = d.operacao; document.getElementById('select-operacao').value = d.operacao; }
+    if(d.picoDecendio){ picoDecendioTipo = d.picoDecendio; document.getElementById('select-pico-decendio').value = d.picoDecendio; }
+    if(d.metrica){
+      metricaAtual = d.metrica;
+      document.querySelectorAll('.metric-btn').forEach(x => x.classList.toggle('active', x.dataset.metric === d.metrica));
+    }
+
+    // seleções dos comparativos
+    ['Extrema','Navegantes'].forEach(loc => {
+      const c = d.comparativoCustos && d.comparativoCustos[loc];
+      if(c){
+        const a = idxFlow(c.a), b = idxFlow(c.b), ca = idxCustos(c.ca), cb = idxCustos(c.cb);
+        if(a >= 0 && b >= 0 && ca >= 0 && cb >= 0) comparativoCustosIdx[loc] = {a, b, ca, cb, offA: c.offA || [], offB: c.offB || [], tocado: true};
+        else avisos.push('comparativo de custos (' + loc + ')');
+      }
+      const r = d.dre && d.dre[loc];
+      if(r){
+        const ids = (r.flows || []).map(idxFlow), cs = (r.custos || []).map(idxCustos);
+        if(ids.length >= 2 && ids.every(i => i >= 0) && cs.every(i => i >= 0)) dreVersaoIdx[loc] = {ids, custos: cs, off: (r.off || []).map(x => x || []), tocado: true};
+        else avisos.push('DRE (' + loc + ')');
+      }
+    });
+
+    // UM único ciclo de renderização
+    recalcularTudo();
+    ['Extrema','Navegantes'].forEach(l => { renderOutrosServicosUI(l); renderEventosUI(l); renderReajustesUI(l); });
+    renderSeletorCustos();
+    renderVersoesUI();
+    salvarLocalSilencioso();
+    if(avisos.length) alert('Visão aplicada, mas não encontrei: ' + avisos.join('; ') + '. Esses itens ficaram como estavam.');
+  }
+
+  function salvarVisaoAtual(nome){
+    nome = (nome || '').trim();
+    if(!nome){ alert('Dê um nome para a visão.'); return; }
+    const existente = presetsVisao.find(p => p.nome.toLowerCase() === nome.toLowerCase());
+    if(existente && !confirm('Já existe uma visão chamada "' + existente.nome + '". Substituir pelos filtros atuais?')) return;
+    const dados = capturarVisao();
+    if(existente){ existente.dados = dados; existente.atualizadoEm = new Date().toISOString(); }
+    else presetsVisao.push({id: 'v' + Date.now() + Math.random().toString(36).slice(2, 6), nome, criadoEm: new Date().toISOString(), dados});
+    salvarPresetsLocal();
+    renderSeletorVisoes();
+  }
+  function atualizarVisao(id){
+    const p = presetsVisao.find(x => x.id === id); if(!p) return;
+    if(!confirm('Sobrescrever a visão "' + p.nome + '" com os filtros e seleções atuais?')) return;
+    p.dados = capturarVisao(); p.atualizadoEm = new Date().toISOString();
+    salvarPresetsLocal(); renderSeletorVisoes();
+  }
+  function excluirVisao(id){
+    const p = presetsVisao.find(x => x.id === id); if(!p) return;
+    if(!confirm('Excluir a visão "' + p.nome + '"?')) return;
+    presetsVisao = presetsVisao.filter(x => x.id !== id);
+    salvarPresetsLocal(); renderSeletorVisoes();
+  }
+  function renomearVisao(id, novo){
+    const p = presetsVisao.find(x => x.id === id); novo = (novo || '').trim();
+    if(!p || !novo || novo === p.nome) return;
+    p.nome = novo; salvarPresetsLocal(); renderSeletorVisoes();
+  }
+  function usarVisao(id){
+    const p = presetsVisao.find(x => x.id === id); if(!p) return;
+    if(!versoesFlow.length || !cubResultadoGlobal){ alert('Carregue os dados (flow e cubagem) antes de aplicar uma visão.'); return; }
+    aplicarVisao(p);
+  }
+  window.__usarVisao = usarVisao; window.__atualizarVisao = atualizarVisao;
+  window.__excluirVisao = excluirVisao; window.__renomearVisao = renomearVisao;
+  window.__salvarVisaoAtual = salvarVisaoAtual;
+
+  function renderSeletorVisoes(){
+    const sel = document.getElementById('select-visao-rapida');
+    if(sel){
+      sel.innerHTML = '<option value="">⭐ Aplicar visão salva...</option>' +
+        presetsVisao.map(p => '<option value="' + p.id + '">' + String(p.nome).replace(/</g, '&lt;') + '</option>').join('');
+      sel.value = '';
+    }
+    if(document.getElementById('modal-overlay').classList.contains('aberto') && document.getElementById('modal-box').dataset.tipo === 'visoes') abrirModalVisoes();
+  }
+
+  function abrirModalVisoes(){
+    devolverConteudosMovidos();
+    const box = document.getElementById('modal-box');
+    box.style.maxWidth = 'min(1000px, 96vw)';
+    box.style.maxHeight = '90vh';
+    box.dataset.tipo = 'visoes';
+    const esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    const lista = presetsVisao.length ? presetsVisao.map(p =>
+      '<div style="display:flex; flex-direction:column; gap:6px; padding:10px; border:1px solid var(--border); border-radius:8px; margin-bottom:6px; background:var(--bg);">' +
+        '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">' +
+          '<input type="text" value="' + esc(p.nome) + '" style="flex:1; min-width:200px; font-size:13px; font-weight:600; padding:4px 6px; border-radius:6px; border:1px solid var(--border); background:var(--surface);" onblur="window.__renomearVisao(\'' + p.id + '\', this.value)" onkeydown="if(event.key===\'Enter\') this.blur();" />' +
+          '<button class="btn-copiar-tabela" onclick="window.__usarVisao(\'' + p.id + '\')">Aplicar</button>' +
+          '<button class="btn-copiar-tabela" onclick="window.__atualizarVisao(\'' + p.id + '\')">Atualizar com a visão atual</button>' +
+          '<button class="btn-copiar-tabela" onclick="window.__excluirVisao(\'' + p.id + '\')">Excluir</button>' +
+        '</div>' +
+        '<div class="secao-nota" style="margin:0;">' + esc(resumoVisao(p.dados)) + '</div>' +
+      '</div>').join('') : '<p class="secao-nota">Nenhuma visão salva ainda.</p>';
+    box.innerHTML = '<button class="modal-close-btn" onclick="window.__fecharModal()">&times;</button>' +
+      '<h3>Visões salvas</h3>' +
+      '<div class="secao-nota" style="margin-bottom:8px;">Salva a combinação atual: flow e versão de custos em uso, reajustes ligados/desligados, filtros da lateral, período, métrica e as seleções dos comparativos (Custos e DRE). Para compartilhar com o time, use "Publicar dados atuais para todos".</div>' +
+      '<div style="display:flex; gap:6px; margin-bottom:1rem; flex-wrap:wrap;">' +
+        '<input type="text" id="input-nome-visao" placeholder="Nome da visão (ex.: Flow v2 + Custos v1 sem dissídio)" style="flex:1; min-width:240px; font-size:13px; padding:6px 8px; border-radius:var(--radius); border:1px solid var(--border);" />' +
+        '<button class="btn-copiar-tabela" id="btn-salvar-visao">Salvar visão atual</button>' +
+      '</div>' + lista;
+    document.getElementById('btn-salvar-visao').addEventListener('click', () => salvarVisaoAtual(document.getElementById('input-nome-visao').value));
+    document.getElementById('modal-overlay').classList.add('aberto');
+  }
+
   function serializarEstadoAtual(){
     sincronizarCustosAtivo();
     return {
       versoesFlow,
       versoesCustos,
       custosAtivoIdx,
+      presetsVisao,
       cubResultadoGlobal: cubagemMapParaLista(cubResultadoGlobal),
       custosParsed,
       servicosManuais,
@@ -4714,6 +4987,7 @@
 
   document.getElementById('btn-publicar').addEventListener('click', publicarDadosCompartilhados);
 
+  renderSeletorVisoes();
   verificarDadosCompartilhados();
 })();
 </script>
