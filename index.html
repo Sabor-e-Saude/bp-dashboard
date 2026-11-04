@@ -315,6 +315,7 @@
           <label class="chk-item"><input type="checkbox" checked data-value="Loja"> <span>Loja / Varejo (LMC/Retail)</span></label>
           <label class="chk-item"><input type="checkbox" checked data-value="E.Comm"> <span>E.Comm</span></label>
           <label class="chk-item"><input type="checkbox" checked data-value="Peças"> <span>Peças</span></label>
+          <label class="chk-item"><input type="checkbox" checked data-value="B2B"> <span>B2B (Extrema)</span></label>
         </div>
 
         <h3>Tipo de armazenagem</h3>
@@ -478,6 +479,11 @@
           </div>
 
           <div id="custos-cd-Extrema" class="subtab-custos-panel active">
+            <div class="custos-versao-bar" style="display:none; align-items:center; gap:8px; margin-bottom:0.75rem; flex-wrap:wrap;">
+              <label style="font-size:13px; color:var(--text2);">Versão de custos em uso:</label>
+              <select class="select-custos-versao" style="font-size:13px; padding:5px 8px; border-radius:var(--radius); border:1px solid var(--border);"></select>
+              <span class="secao-nota" style="margin:0;">Edições (quantidades, reajustes, canal/categoria) valem para esta versão. Um novo arquivo de custos cria uma nova versão.</span>
+            </div>
             <details class="secao" id="secao-comparativo-custos-Extrema" style="display:none;">
               <summary>Comparativo de custos entre versões do BP27</summary>
               <div class="secao-nota">Δ = versão B menos versão A, no Total Cobrado de cada mês.</div>
@@ -539,6 +545,11 @@
             <details class="secao">
               <summary>Outros custos — preencha a quantidade mensal</summary>
               <div class="secao-nota">Serviços da planilha que não dá pra calcular automaticamente (faltam dados de volume/evento), mais os que você adicionar. O preço unitário já vem do arquivo (ou do que você definir) — só falta a quantidade/percentual.</div>
+              <div class="custos-versao-bar-mini" style="display:none; align-items:center; gap:8px; margin:0 0 0.75rem; flex-wrap:wrap;">
+                <label style="font-size:13px; color:var(--text2);">Versão de custos:</label>
+                <select class="select-custos-versao" style="font-size:13px; padding:5px 8px; border-radius:var(--radius); border:1px solid var(--border);"></select>
+                <span class="secao-nota" style="margin:0;">As quantidades abaixo valem só para a versão selecionada.</span>
+              </div>
               <div id="outros-custos-Extrema"></div>
             </details>
 
@@ -570,12 +581,18 @@
                 <label style="font-size:13px; color:var(--text2); padding-top:8px;">A partir de:</label>
                 <select id="reajuste-mes-Extrema" style="font-size:13px; padding:6px 8px; border-radius:var(--radius); border:1px solid var(--border);"></select>
                 <input type="number" id="reajuste-percentual-Extrema" min="0" step="0.1" placeholder="% de reajuste" style="width:130px; font-size:13px; padding:6px 8px; border-radius:var(--radius); border:1px solid var(--border);" />
+                <input type="text" id="reajuste-comentario-Extrema" placeholder="Comentário: a que se refere o reajuste (ex.: dissídio, IPCA)" style="flex:1; min-width:220px; font-size:13px; padding:6px 8px; border-radius:var(--radius); border:1px solid var(--border);" />
                 <button class="btn-copiar-tabela" onclick="window.__adicionarReajuste('Extrema')">+ Adicionar reajuste</button>
               </div>
             </div>
           </div>
 
           <div id="custos-cd-Navegantes" class="subtab-custos-panel">
+            <div class="custos-versao-bar" style="display:none; align-items:center; gap:8px; margin-bottom:0.75rem; flex-wrap:wrap;">
+              <label style="font-size:13px; color:var(--text2);">Versão de custos em uso:</label>
+              <select class="select-custos-versao" style="font-size:13px; padding:5px 8px; border-radius:var(--radius); border:1px solid var(--border);"></select>
+              <span class="secao-nota" style="margin:0;">Edições (quantidades, reajustes, canal/categoria) valem para esta versão. Um novo arquivo de custos cria uma nova versão.</span>
+            </div>
             <details class="secao" id="secao-comparativo-custos-Navegantes" style="display:none;">
               <summary>Comparativo de custos entre versões do BP27</summary>
               <div class="secao-nota">Δ = versão B menos versão A, no Total Cobrado de cada mês.</div>
@@ -637,6 +654,11 @@
             <details class="secao">
               <summary>Outros custos — preencha a quantidade mensal</summary>
               <div class="secao-nota">Serviços da planilha que não dá pra calcular automaticamente (faltam dados de volume/evento), mais os que você adicionar. O preço unitário já vem do arquivo (ou do que você definir) — só falta a quantidade/percentual.</div>
+              <div class="custos-versao-bar-mini" style="display:none; align-items:center; gap:8px; margin:0 0 0.75rem; flex-wrap:wrap;">
+                <label style="font-size:13px; color:var(--text2);">Versão de custos:</label>
+                <select class="select-custos-versao" style="font-size:13px; padding:5px 8px; border-radius:var(--radius); border:1px solid var(--border);"></select>
+                <span class="secao-nota" style="margin:0;">As quantidades abaixo valem só para a versão selecionada.</span>
+              </div>
               <div id="outros-custos-Navegantes"></div>
             </details>
 
@@ -668,6 +690,7 @@
                 <label style="font-size:13px; color:var(--text2); padding-top:8px;">A partir de:</label>
                 <select id="reajuste-mes-Navegantes" style="font-size:13px; padding:6px 8px; border-radius:var(--radius); border:1px solid var(--border);"></select>
                 <input type="number" id="reajuste-percentual-Navegantes" min="0" step="0.1" placeholder="% de reajuste" style="width:130px; font-size:13px; padding:6px 8px; border-radius:var(--radius); border:1px solid var(--border);" />
+                <input type="text" id="reajuste-comentario-Navegantes" placeholder="Comentário: a que se refere o reajuste (ex.: dissídio, IPCA)" style="flex:1; min-width:220px; font-size:13px; padding:6px 8px; border-radius:var(--radius); border:1px solid var(--border);" />
                 <button class="btn-copiar-tabela" onclick="window.__adicionarReajuste('Navegantes')">+ Adicionar reajuste</button>
               </div>
             </div>
@@ -743,7 +766,7 @@
   <footer>
     <details class="info-toggle"><summary></summary>
       <div class="info-panel">
-        Lógica: fontes de dados = LMC_BP27_EXT, ECOMM_BP27_EXT, RETAIL_BP27_NVT, ECOMM_BP27_NVT (as abas "Total" não são lidas — o Total é calculado somando os canais dentro do próprio painel). TRANSF (só existe em Navegantes) é ignorado — é um redirecionamento interno de saldo entre Retail e E.Comm, não entrada nem saída real.
+        Lógica: fontes de dados = LMC_BP27_EXT, ECOMM_BP27_EXT, B2B_BP27_EXT, RETAIL_BP27_NVT, ECOMM_BP27_NVT (as abas "Total" não são lidas — o Total é calculado somando os canais dentro do próprio painel). TRANSF (só existe em Navegantes) é ignorado — é um redirecionamento interno de saldo entre Retail e E.Comm, não entrada nem saída real.
         Regra de blocado: SIM → M², NÃO → Porta Palletes (÷ L&amp;C) — aplicada por fonte, somada depois. M³ e M² Stack = sempre calculados. Pico (Estoque Final) = Inicial+Entrada−Venda (dado direto da planilha). Pico (Inicial+Entrada) = sem subtrair a venda.
       </div>
     </details>
@@ -766,9 +789,10 @@
     {sheet:'ECOMM_BP27_EXT',  localidade:'Extrema',    canal:'E.Comm', temTransf:false},
     {sheet:'RETAIL_BP27_NVT', localidade:'Navegantes', canal:'Loja',   temTransf:true},
     {sheet:'ECOMM_BP27_NVT',  localidade:'Navegantes', canal:'E.Comm', temTransf:true},
-    {sheet:'PECAS_BP27_EXT',  localidade:'Extrema',    canal:'Peças',  temTransf:false}
+    {sheet:'PECAS_BP27_EXT',  localidade:'Extrema',    canal:'Peças',  temTransf:false},
+    {sheet:'B2B_BP27_EXT',    localidade:'Extrema',    canal:'B2B',    temTransf:false}
   ];
-  const CANAIS_REAIS = ['Loja','E.Comm','Peças']; // canais que realmente existem nos dados de ocupação (vindos do BP)
+  const CANAIS_REAIS = ['Loja','E.Comm','Peças','B2B']; // canais que realmente existem nos dados de ocupação (vindos do BP)
 
   function acharNomeAba(sheetNames, nomeAlvo){
     // tenta o nome exato primeiro; se não achar, aceita abas renomeadas tipo "NOME (2)"
@@ -816,7 +840,162 @@
   let resumoVisualizacao = {Extrema: 'grafico', Navegantes: 'grafico'};
   let eventosManuais = {Extrema: [], Navegantes: []};
   let reajustesManuais = {Extrema: [], Navegantes: []}; // {id,alvos:[...],mesInicio,percentual}
-  const CANAIS_SERVICO = ['Peças','Lojas','E.Comm','HA'];
+  const CANAIS_SERVICO = ['Peças','Lojas','E.Comm','HA','B2B'];
+  // Canal/categoria editáveis das linhas AUTOMÁTICAS (Porta Palete, Bloco, Expedição...).
+  // Só muda o rótulo de exibição (Custos, Resumo, DRE) — o cálculo continua pelo canal físico.
+  // chave: id + '|' + canal original de exibição -> {categoriaCanal, categoriaLinha}
+  let ajustesLinhasAuto = {Extrema: {}, Navegantes: {}};
+  // ids (rid) dos reajustes DESLIGADOS na visão em uso — parte da versão de custos; vazio = todos valem
+  let reajustesOff = {Extrema: [], Navegantes: []};
+  const CANAIS_AUTO_ROTULOS = ['Loja/Varejo','E.Comm','Peças','B2B'];
+  // ------------------------------------------------------------------
+  // VERSÕES DE CUSTOS — cada arquivo Custos_CDs enviado vira uma versão (preços do
+  // arquivo + serviços/quantidades, eventos, reajustes e canal/categoria editados).
+  // As variáveis globais (custosParsed, servicosManuais...) são sempre a versão ATIVA
+  // (a que a tela principal mostra e edita); as outras ficam congeladas em versoesCustos
+  // e só entram nas comparações, via comCustosVersao().
+  // ------------------------------------------------------------------
+  let versoesCustos = []; // [{nome, custosParsed, servicosManuais, eventosManuais, reajustesManuais, ajustesLinhasAuto}]
+  let custosAtivoIdx = -1;
+  function cloneJSON(o){ return o === undefined ? undefined : JSON.parse(JSON.stringify(o)); }
+  function normalizarPorLoc(o){
+    const r = {Extrema: [], Navegantes: []};
+    if(o) ['Extrema','Navegantes'].forEach(l => { if(o[l]) r[l] = o[l]; });
+    return r;
+  }
+  function estadoCustosAtual(){ return {custosParsed, servicosManuais, eventosManuais, reajustesManuais, ajustesLinhasAuto, reajustesOff}; }
+  // rid estável por reajuste (os antigos não tinham): mesma posição/mês/% gera o mesmo rid nas versões clonadas
+  function atribuirRids(reajustes){
+    ['Extrema','Navegantes'].forEach(l => (reajustes[l] || []).forEach((r, i) => { if(!r.rid) r.rid = 'rj' + i + '_' + r.mesInicio + '_' + r.percentual; }));
+    return reajustes;
+  }
+  function reajusteDesligado(loc, r){ return ((reajustesOff && reajustesOff[loc]) || []).includes(r.rid); }
+  function sincronizarCustosAtivo(){
+    if(custosAtivoIdx < 0 || !versoesCustos[custosAtivoIdx]) return;
+    Object.assign(versoesCustos[custosAtivoIdx], estadoCustosAtual());
+  }
+  function aplicarEstadoCustos(v){
+    custosParsed = v.custosParsed || null;
+    servicosManuais = normalizarPorLoc(v.servicosManuais);
+    eventosManuais = normalizarPorLoc(v.eventosManuais);
+    reajustesManuais = normalizarPorLoc(v.reajustesManuais);
+    ['Extrema','Navegantes'].forEach(l => { reajustesManuais[l] = reajustesManuais[l].map(r => ({...r, alvos: r.alvos || []})); });
+    atribuirRids(reajustesManuais);
+    reajustesOff = normalizarPorLoc(v.reajustesOff);
+    ajustesLinhasAuto = normalizarAjustesAuto(v.ajustesLinhasAuto);
+    Object.assign(v, estadoCustosAtual()); // a versão passa a apontar pros mesmos objetos: editar = salvar nela
+  }
+  // roda fn() com o custo de OUTRA versão (sem mexer na tela) e devolve ao estado original.
+  // Opcional: loc + offLoc (lista de rids de reajustes desligados) sobrepõem a escolha de reajustes daquele CD.
+  function comCustosVersao(idx, fn, loc, offLoc){
+    const valido = Number.isInteger(idx) && idx >= 0 && idx < versoesCustos.length;
+    const trocar = valido && idx !== custosAtivoIdx;
+    const temOff = Array.isArray(offLoc) && !!loc;
+    if(!trocar && !temOff) return fn();
+    const salvo = estadoCustosAtual();
+    try{
+      if(trocar){
+        const v = versoesCustos[idx];
+        custosParsed = v.custosParsed || null;
+        servicosManuais = normalizarPorLoc(v.servicosManuais);
+        eventosManuais = normalizarPorLoc(v.eventosManuais);
+        reajustesManuais = atribuirRids(normalizarPorLoc(v.reajustesManuais));
+        reajustesOff = normalizarPorLoc(v.reajustesOff);
+        ajustesLinhasAuto = normalizarAjustesAuto(v.ajustesLinhasAuto);
+      }
+      if(temOff) reajustesOff = {...reajustesOff, [loc]: offLoc};
+      return fn();
+    } finally {
+      custosParsed = salvo.custosParsed; servicosManuais = salvo.servicosManuais; eventosManuais = salvo.eventosManuais;
+      reajustesManuais = salvo.reajustesManuais; ajustesLinhasAuto = salvo.ajustesLinhasAuto; reajustesOff = salvo.reajustesOff;
+    }
+  }
+  // rótulo curto de cada reajuste (pra caixa de flags)
+  function rotuloReajuste(r){
+    return '+' + r.percentual + '% a partir de ' + MESES[r.mesInicio] + (r.comentario ? ' — ' + r.comentario : '');
+  }
+  // caixa de seleção (flags) dos reajustes de uma versão de custos; off = rids desligados; onToggle(rid, ligado)
+  function htmlFlagsReajustes(idCustos, off, dataAttr){
+    const v = versoesCustos[idCustos];
+    const lista = [];
+    if(v){
+      const reaj = (idCustos === custosAtivoIdx) ? reajustesManuais : atribuirRids(normalizarPorLoc(v.reajustesManuais));
+      (reaj[dataAttr.loc] || []).forEach(r => lista.push(r));
+    }
+    const total = lista.length, ligados = lista.filter(r => !(off || []).includes(r.rid)).length;
+    const itens = lista.length ? lista.map(r =>
+      '<label style="display:flex; gap:6px; align-items:flex-start; padding:3px 0; font-size:12px; cursor:pointer;">' +
+      '<input type="checkbox" class="chk-reaj-flag" data-rid="' + String(r.rid).replace(/"/g,'&quot;') + '" ' + (!(off || []).includes(r.rid) ? 'checked' : '') + ' /> ' +
+      '<span>' + rotuloReajuste(r).replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</span></label>').join('')
+      : '<span class="secao-nota" style="margin:0;">Nenhum reajuste nesta versão de custos.</span>';
+    return '<details class="dd-reaj" data-loc="' + dataAttr.loc + '" data-ctx="' + dataAttr.ctx + '" style="position:relative; display:inline-block;">' +
+      '<summary style="cursor:pointer; font-size:13px; padding:5px 8px; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); list-style:none; white-space:nowrap;">Reajustes (' + ligados + '/' + total + ') ▾</summary>' +
+      '<div style="position:absolute; z-index:50; margin-top:4px; min-width:260px; max-width:420px; padding:8px 10px; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); box-shadow:0 4px 14px rgba(0,0,0,.12);">' + itens + '</div></details>';
+  }
+
+  // reajustes desligados que valem pra um lado: escolha própria do lado (array) ou, se nunca mexeu, a da versão
+  function offBaseDaVersao(ci, loc){
+    if(ci === custosAtivoIdx) return (reajustesOff && reajustesOff[loc]) || [];
+    const v = versoesCustos[ci];
+    return (v && v.reajustesOff && v.reajustesOff[loc]) || [];
+  }
+  function offEfetivo(escolhaDoLado, ci, loc){ return Array.isArray(escolhaDoLado) ? escolhaDoLado : offBaseDaVersao(ci, loc); }
+  function sufixoReajustes(ci, off, loc){
+    const v = versoesCustos[ci]; if(!v) return '';
+    const reaj = (ci === custosAtivoIdx ? reajustesManuais : normalizarPorLoc(v.reajustesManuais))[loc] || [];
+    const desl = reaj.filter(r => (off || []).includes(r.rid)).length;
+    return desl ? ' [' + (reaj.length - desl) + '/' + reaj.length + ' reaj.]' : '';
+  }
+  function aoAlternarFlagReajuste(loc, ctx, rid, ligado){
+    const alterna = arr => { const s = new Set(arr || []); if(ligado) s.delete(rid); else s.add(rid); return [...s]; };
+    if(ctx === 'main'){
+      reajustesOff[loc] = alterna(reajustesOff[loc]);
+      sincronizarCustosAtivo(); salvarLocalSilencioso();
+      renderSeletorCustos(); rerenderTudoCustos();
+    } else if(ctx === 'cmpA' || ctx === 'cmpB'){
+      const idx = comparativoCustosIdx[loc], k = ctx === 'cmpA' ? 'offA' : 'offB', ci = ctx === 'cmpA' ? idx.ca : idx.cb;
+      idx[k] = alterna(offEfetivo(idx[k], ci, loc));
+      renderComparativoCustosVersoes(loc);
+    } else if(ctx.indexOf('dre') === 0){
+      const slot = Number(ctx.slice(3)), o = dreVersaoIdx[loc];
+      o.off[slot] = alterna(offEfetivo(o.off[slot], o.custos[slot], loc));
+      renderDRE(loc);
+    }
+  }
+  function ligarFlagsReajustes(){
+    document.querySelectorAll('.dd-reaj').forEach(dd => {
+      if(dd.dataset.wired) return;
+      dd.dataset.wired = '1';
+      dd.addEventListener('change', e => {
+        const chk = e.target;
+        if(!chk.classList || !chk.classList.contains('chk-reaj-flag')) return;
+        const loc = dd.dataset.loc, ctx = dd.dataset.ctx;
+        aoAlternarFlagReajuste(loc, ctx, chk.dataset.rid, chk.checked);
+        const novo = document.querySelector('.dd-reaj[data-loc="' + loc + '"][data-ctx="' + ctx + '"]');
+        if(novo) novo.open = true; // a caixa é redesenhada: reabre pra marcar vários em sequência
+      });
+    });
+  }
+
+  // versão de custos "de origem" de uma versão de flow (a ativa quando o flow foi enviado)
+  function custosIdxDe(flow){
+    const c = flow ? flow.custosIdx : undefined;
+    return (Number.isInteger(c) && c >= 0 && c < versoesCustos.length) ? c : Math.max(0, versoesCustos.length - 1);
+  }
+  function rotuloComCustos(flow, ci){
+    return flow.nome + (versoesCustos.length > 1 ? ' · ' + nomeVersaoCustos(ci) : '');
+  }
+  function nomeVersaoCustos(i){ return (versoesCustos[i] && versoesCustos[i].nome) || '(sem nome)'; }
+
+  // Chaves do Firebase não aceitam . # $ / [ ] — troca por '_' (idempotente).
+  function chaveAjusteAuto(id, canalOriginal){ return String(id + '|' + canalOriginal).replace(/[.#$\/\[\]]/g, '_'); }
+  function normalizarAjustesAuto(obj){
+    const out = {Extrema: {}, Navegantes: {}};
+    ['Extrema','Navegantes'].forEach(loc => {
+      Object.keys((obj && obj[loc]) || {}).forEach(k => { out[loc][k.replace(/[.#$\/\[\]]/g, '_')] = obj[loc][k]; });
+    });
+    return out;
+  }
   let LINHAS_SERVICO = ['Armazenagem','Movimentação','Taxas','Pessoas','Serviços','Horas'];
 
   document.getElementById('input-flow').addEventListener('change', e => handleFlowFiles(e.target.files));
@@ -897,7 +1076,7 @@
     try{
       for(const file of files){
         const fontes = await parseArquivoBP(file);
-        versoesFlow.push({nome: file.name, fontes});
+        versoesFlow.push({nome: file.name, fontes, custosIdx: custosAtivoIdx >= 0 ? custosAtivoIdx : undefined});
       }
       versaoAtivaIndex = versoesFlow.length - 1; // a mais recente vira a ativa
       statusEl.textContent = versoesFlow.length + ' versão(ões) carregada(s) no total';
@@ -916,7 +1095,7 @@
     if(!file || indiceParaSubstituir === null) return;
     try{
       const fontes = await parseArquivoBP(file);
-      versoesFlow[indiceParaSubstituir] = {nome: file.name, fontes};
+      versoesFlow[indiceParaSubstituir] = {nome: file.name, fontes, custosIdx: versoesFlow[indiceParaSubstituir].custosIdx};
       renderVersoesUI();
       if(cubWb) processar();
     }catch(err){
@@ -960,6 +1139,106 @@
     }
   }
 
+  // ---- versões de custos: seletor, usar, renomear, remover, vincular ----
+  function renderSeletorCustos(){
+    const opcoes = versoesCustos.map((v, i) => '<option value="' + i + '">' + nomeVersaoCustos(i).replace(/</g, '&lt;') + '</option>').join('');
+    document.querySelectorAll('.custos-versao-bar, .custos-versao-bar-mini').forEach(bar => { bar.style.display = versoesCustos.length ? 'flex' : 'none'; });
+    // flags de reajustes da visão geral (versão em uso), uma por CD
+    document.querySelectorAll('.custos-versao-bar').forEach(bar => {
+      const painel = bar.closest('.subtab-custos-panel');
+      if(!painel) return;
+      const loc = painel.id.replace('custos-cd-', '');
+      let slot = bar.querySelector('.slot-flags-reaj');
+      if(!slot){ slot = document.createElement('span'); slot.className = 'slot-flags-reaj'; bar.insertBefore(slot, bar.querySelector('.secao-nota')); }
+      slot.innerHTML = htmlFlagsReajustes(custosAtivoIdx, reajustesOff[loc], {loc, ctx: 'main'});
+    });
+    ligarFlagsReajustes();
+    document.querySelectorAll('.select-custos-versao').forEach(sel => {
+      sel.innerHTML = opcoes;
+      sel.value = custosAtivoIdx;
+      sel.onchange = () => usarVersaoCustos(Number(sel.value));
+    });
+    if(document.getElementById('modal-overlay').classList.contains('aberto') && document.getElementById('modal-box').dataset.tipo === 'versoes'){
+      abrirModalVersoes();
+    }
+  }
+
+  function rerenderTudoCustos(){
+    ['Extrema','Navegantes'].forEach(l => {
+      renderOutrosServicosUI(l); renderEventosUI(l); renderReajustesUI(l);
+    });
+    if(detalhadoGlobal) renderCustos();
+    renderComparativoCustosVersoes();
+    renderDRE();
+  }
+
+  function usarVersaoCustos(idx){
+    if(!Number.isInteger(idx) || idx < 0 || idx >= versoesCustos.length || idx === custosAtivoIdx){ renderSeletorCustos(); return; }
+    sincronizarCustosAtivo();
+    custosAtivoIdx = idx;
+    aplicarEstadoCustos(versoesCustos[idx]);
+    salvarLocalSilencioso();
+    renderSeletorCustos();
+    rerenderTudoCustos();
+  }
+
+  function renomearVersaoCustos(idx, novoNome){
+    const nome = (novoNome || '').trim();
+    if(!nome || !versoesCustos[idx] || nome === versoesCustos[idx].nome) return;
+    versoesCustos[idx].nome = nome;
+    renderSeletorCustos();
+    renderComparativoCustosVersoes();
+    renderDRE();
+  }
+
+  function removerVersaoCustos(idx){
+    if(versoesCustos.length <= 1){ alert('Precisa manter pelo menos uma versão de custos.'); return; }
+    if(!confirm('Remover a versão de custos "' + versoesCustos[idx].nome + '"? Os flows vinculados a ela passam a usar a mais recente.')) return;
+    sincronizarCustosAtivo();
+    const eraAtiva = idx === custosAtivoIdx;
+    versoesCustos.splice(idx, 1);
+    versoesFlow.forEach(f => {
+      if(f.custosIdx === idx) f.custosIdx = undefined;
+      else if(Number.isInteger(f.custosIdx) && f.custosIdx > idx) f.custosIdx--;
+    });
+    const fixa = i => (i === idx ? -1 : (i > idx ? i - 1 : i));
+    ['Extrema','Navegantes'].forEach(l => {
+      const c = comparativoCustosIdx[l]; c.ca = fixa(c.ca); c.cb = fixa(c.cb);
+      const d = dreVersaoIdx[l]; d.custos = (d.custos || []).map(fixa); d.off = (d.off || []).map(() => null);
+      c.offA = null; c.offB = null;
+    });
+    if(eraAtiva){ custosAtivoIdx = versoesCustos.length - 1; aplicarEstadoCustos(versoesCustos[custosAtivoIdx]); }
+    else if(custosAtivoIdx > idx) custosAtivoIdx--;
+    salvarLocalSilencioso();
+    renderSeletorCustos();
+    rerenderTudoCustos();
+  }
+
+  function vincularCustosAoFlow(idxFlow, idxCustos){
+    if(!versoesFlow[idxFlow]) return;
+    versoesFlow[idxFlow].custosIdx = Number(idxCustos);
+    renderComparativoCustosVersoes();
+    renderDRE();
+  }
+  window.__usarVersaoCustos = usarVersaoCustos;
+  window.__renomearVersaoCustos = renomearVersaoCustos;
+  window.__removerVersaoCustos = removerVersaoCustos;
+  window.__vincularCustosAoFlow = vincularCustosAoFlow;
+
+  function conteudoListaVersoesCustos(){
+    if(!versoesCustos.length) return '<p class="secao-nota">Nenhum arquivo de custos carregado ainda.</p>';
+    return versoesCustos.map((v, idx) => {
+      const ativa = idx === custosAtivoIdx;
+      const nomeEsc = String(v.nome).replace(/"/g, '&quot;');
+      return '<div style="display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px; margin-bottom:4px; background:' + (ativa ? 'var(--accent-bg)' : 'var(--bg)') + '; border:1px solid ' + (ativa ? 'var(--accent)' : 'var(--border)') + ';">' +
+        '<input type="text" value="' + nomeEsc + '" title="Clique pra renomear" style="flex:1; min-width:0; font-size:13px; padding:4px 6px; border-radius:6px; border:1px solid var(--border); background:var(--surface);" ' +
+          'onblur="window.__renomearVersaoCustos(' + idx + ', this.value);" onkeydown="if(event.key===\'Enter\') this.blur();" />' +
+        (ativa ? '<span style="font-size:11px; color:var(--accent-dark); font-weight:600; white-space:nowrap;">Em uso</span>' : '<button class="btn-copiar-tabela" onclick="window.__usarVersaoCustos(' + idx + ')">Usar esta versão</button>') +
+        '<button class="btn-copiar-tabela" onclick="window.__removerVersaoCustos(' + idx + ')">Remover</button>' +
+      '</div>';
+    }).join('');
+  }
+
   function renomearVersao(idx, novoNome){
     const nome = (novoNome || '').trim();
     if(!nome || nome === versoesFlow[idx].nome) return;
@@ -984,6 +1263,8 @@
           'onblur="this.style.borderColor=\'transparent\'; this.style.background=\'transparent\'; window.__renomearVersao(' + idx + ', this.value);" ' +
           'onkeydown="if(event.key===\'Enter\') this.blur();" />' +
         (ativa ? '<span style="font-size:11px; color:var(--accent-dark); font-weight:600; white-space:nowrap;">Em uso no painel</span>' : '<button class="btn-copiar-tabela" onclick="window.__usarVersao(' + idx + ')">Usar esta versão</button>') +
+        (versoesCustos.length > 1 ? '<select title="Versão de custos padrão deste flow nas comparações" style="font-size:12px; padding:3px; border-radius:6px; border:1px solid var(--border);" onchange="window.__vincularCustosAoFlow(' + idx + ', this.value)">' +
+          versoesCustos.map((c, ci) => '<option value="' + ci + '"' + (ci === custosIdxDe(v) ? ' selected' : '') + '>' + nomeVersaoCustos(ci).replace(/</g, '&lt;') + '</option>').join('') + '</select>' : '') +
         '<button class="btn-copiar-tabela" onclick="window.__substituirVersao(' + idx + ')">Substituir arquivo</button>' +
         '<button class="btn-copiar-tabela" onclick="window.__removerVersao(' + idx + ')">Remover</button>' +
       '</div>';
@@ -1007,7 +1288,10 @@
     box.dataset.tipo = 'versoes';
     box.innerHTML = '<button class="modal-close-btn" onclick="window.__fecharModal()">&times;</button>' +
       '<h3>Versões do BP27 carregadas nesta sessão</h3>' +
-      conteudoListaVersoes();
+      conteudoListaVersoes() +
+      '<h3 style="margin-top:1.25rem;">Versões de custos</h3>' +
+      '<div class="secao-nota" style="margin-bottom:6px;">Cada arquivo de custos enviado vira uma versão Nas comparações (Custos e DRE) você escolhe a versão de custos de cada lado.</div>' +
+      conteudoListaVersoesCustos();
     document.getElementById('modal-overlay').classList.add('aberto');
   }
 
@@ -1099,6 +1383,27 @@
     return null;
   }
 
+  // Garante id único por serviço. Versões antigas do merge deixaram serviços de mesmo nome
+  // (ex.: "Analista Administrativo SR" 1º/2º turno) com o MESMO id — aí qualquer edição
+  // (quantidade, canal...) caía sempre no primeiro da lista e a do segundo "voltava" ao
+  // recarregar. O duplicado ganha id novo e herda os reajustes do id original.
+  function garantirIdsUnicosServicos(){
+    ['Extrema','Navegantes'].forEach(loc => {
+      const vistos = new Set();
+      (servicosManuais[loc] || []).forEach(s => {
+        if(!vistos.has(s.id)){ vistos.add(s.id); return; }
+        const antigo = s.id;
+        let n = 2, novo = antigo + '-d' + n;
+        while(vistos.has(novo)) novo = antigo + '-d' + (++n);
+        s.id = novo;
+        vistos.add(novo);
+        (reajustesManuais[loc] || []).forEach(r => {
+          if(r.alvos && r.alvos.includes('servico:' + antigo) && !r.alvos.includes('servico:' + novo)) r.alvos.push('servico:' + novo);
+        });
+      });
+    });
+  }
+
   function seedServicosManuaisDoArquivo(){
     ['Extrema','Navegantes'].forEach(loc => {
       if(!custosParsed[loc]) return;
@@ -1145,10 +1450,13 @@
 
       // preserva também os serviços que o usuário adicionou manualmente (não foram
       // consumidos da fila acima — nem por nome nem por "sobra" de nomes duplicados)
-      const manuaisForaDoArquivo = (servicosManuais[loc] || []).filter(s => !usadosDoExistente.has(s));
+      // só sobrevivem as linhas criadas à mão ('-novo-'); linha que veio do arquivo anterior e não existe no novo
+      // (nome mudou/removida) pertence à versão antiga — mantê-la somaria quantidades de versões diferentes
+      const manuaisForaDoArquivo = (servicosManuais[loc] || []).filter(s => !usadosDoExistente.has(s) && !/-arq-/.test(String(s.id)));
 
       servicosManuais[loc] = novaLista.concat(manuaisForaDoArquivo);
     });
+    garantirIdsUnicosServicos();
   }
 
   function handleCustosFile(file){
@@ -1157,10 +1465,27 @@
     statusEl.textContent = 'Lendo ' + file.name + '...';
     lerArquivoComoWorkbook(file).then(wb => {
       custosWb = wb;
-      custosParsed = parseCustos(wb).precos;
+      const novoParsed = parseCustos(wb).precos;
       const primeiraCargaDaSessao = servicosManuais.Extrema.length === 0 && servicosManuais.Navegantes.length === 0;
       if(primeiraCargaDaSessao) carregarPreenchimentosLocal(); // só tenta recuperar do localStorage na 1ª carga da sessão
+      if(versoesCustos.length > 0){
+        // já existe uma versão: congela a atual e cria a nova, herdando quantidades, reajustes,
+        // eventos e canal/categoria editados — o seed abaixo só atualiza preços/serviços do arquivo
+        sincronizarCustosAtivo();
+        const nova = {nome: file.name, custosParsed: novoParsed,
+          servicosManuais: cloneJSON(servicosManuais), eventosManuais: cloneJSON(eventosManuais),
+          reajustesManuais: cloneJSON(reajustesManuais), ajustesLinhasAuto: cloneJSON(ajustesLinhasAuto), reajustesOff: cloneJSON(reajustesOff)};
+        versoesCustos.push(nova);
+        custosAtivoIdx = versoesCustos.length - 1;
+        aplicarEstadoCustos(nova);
+      } else {
+        custosParsed = novoParsed;
+        versoesCustos = [{nome: file.name}];
+        custosAtivoIdx = 0;
+      }
       seedServicosManuaisDoArquivo(); // preserva preenchimentos já existentes (do localStorage ou de um upload anterior)
+      sincronizarCustosAtivo();
+      renderSeletorCustos();
       renderOutrosServicosUI('Extrema');
       renderOutrosServicosUI('Navegantes');
       renderEventosUI('Extrema');
@@ -1437,6 +1762,22 @@
     function desenhar(filtroTexto){
       const filtro = (filtroTexto || '').toLowerCase();
       opcoesEl.innerHTML = '';
+      // atalhos: marcar/desmarcar todas as cobranças visíveis (respeita a busca)
+      const idsVisiveis = [];
+      grupos.forEach(([, itens]) => itens.forEach(op => { if(op.nome.toLowerCase().includes(filtro)) idsVisiveis.push(op.id); }));
+      const barra = document.createElement('div');
+      barra.style.cssText = 'display:flex; gap:6px; padding:4px 2px 6px; border-bottom:1px solid var(--border); margin-bottom:4px;';
+      barra.innerHTML = '<button type="button" class="btn-copiar-tabela" data-acao="todos">Selecionar todos' + (filtro ? ' (filtrados)' : '') + '</button>' +
+                        '<button type="button" class="btn-copiar-tabela" data-acao="nenhum">Limpar</button>';
+      barra.querySelector('[data-acao="todos"]').addEventListener('click', () => {
+        idsVisiveis.forEach(id => alvosSelecionados[loc].add(id));
+        atualizarLabelMultiselect(loc); desenhar(filtroTexto);
+      });
+      barra.querySelector('[data-acao="nenhum"]').addEventListener('click', () => {
+        idsVisiveis.forEach(id => alvosSelecionados[loc].delete(id));
+        atualizarLabelMultiselect(loc); desenhar(filtroTexto);
+      });
+      opcoesEl.appendChild(barra);
       grupos.forEach(([nomeGrupo, itens]) => {
         const itensFiltrados = itens.filter(op => op.nome.toLowerCase().includes(filtro));
         if(itensFiltrados.length === 0) return;
@@ -1504,17 +1845,22 @@
     (servicosManuais[loc] || []).forEach(s => nomesPorId['servico:' + s.id] = s.nome);
 
     const table = document.createElement('table');
-    table.innerHTML = '<thead><tr><th>A partir de</th><th>Reajuste</th><th>Aplicado em</th><th></th></tr></thead><tbody></tbody>';
+    table.innerHTML = '<thead><tr><th>A partir de</th><th>Reajuste</th><th>Aplicado em</th><th>Comentário</th><th></th></tr></thead><tbody></tbody>';
     const tbody = table.querySelector('tbody');
     lista.forEach((r, idx) => {
       const nomesAlvos = r.alvos.map(a => nomesPorId[a] || a).join(', ');
       const tr = document.createElement('tr');
       tr.innerHTML = '<td>' + MESES[r.mesInicio] + '</td><td>+' + r.percentual + '%</td><td>' + nomesAlvos + '</td>' +
+        '<td><input type="text" class="input-reajuste-comentario" data-idx="' + idx + '" value="' + String(r.comentario || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;') + '" placeholder="A que se refere este reajuste?" style="width:100%; min-width:200px; font-size:12px; padding:4px 6px; border-radius:6px; border:1px solid var(--border);" /></td>' +
         '<td><button class="btn-copiar-tabela" onclick="window.__removerReajuste(\'' + loc + '\',' + idx + ')">Remover</button></td>';
       tbody.appendChild(tr);
     });
     container.innerHTML = '';
     container.appendChild(table);
+    container.querySelectorAll('.input-reajuste-comentario').forEach(el => el.addEventListener('input', e => {
+      const r = reajustesManuais[loc][Number(e.target.dataset.idx)];
+      if(r){ r.comentario = e.target.value; salvarLocalSilencioso(); }
+    }));
   }
 
   function adicionarReajuste(loc){
@@ -1522,12 +1868,15 @@
     const percEl = document.getElementById('reajuste-percentual-' + loc);
     const mesInicio = Number(mesEl.value);
     const percentual = Number(percEl.value) || 0;
+    const comentEl = document.getElementById('reajuste-comentario-' + loc);
+    const comentario = comentEl ? comentEl.value.trim() : '';
     const alvos = Array.from(alvosSelecionados[loc]);
     if(alvos.length === 0){ alert('Marque pelo menos uma cobrança pra aplicar o reajuste.'); return; }
     if(percentual <= 0){ alert('Informe um percentual de reajuste maior que zero.'); return; }
     if(!reajustesManuais[loc]) reajustesManuais[loc] = [];
-    reajustesManuais[loc].push({alvos, mesInicio, percentual});
+    reajustesManuais[loc].push({rid: 'rj' + Date.now() + Math.random().toString(36).slice(2, 6), alvos, mesInicio, percentual, comentario});
     percEl.value = '';
+    if(comentEl) comentEl.value = '';
     alvosSelecionados[loc].clear();
     document.getElementById('reajuste-panel-' + loc).style.display = 'none';
     renderReajustesUI(loc);
@@ -1536,7 +1885,11 @@
   }
 
   function removerReajuste(loc, idx){
+    const ridRem = reajustesManuais[loc][idx] && reajustesManuais[loc][idx].rid;
     reajustesManuais[loc].splice(idx, 1);
+    if(ridRem && reajustesOff[loc]) reajustesOff[loc] = reajustesOff[loc].filter(x => x !== ridRem);
+    sincronizarCustosAtivo();
+    renderSeletorCustos();
     renderReajustesUI(loc);
     renderCustos();
     salvarLocalSilencioso();
@@ -1548,6 +1901,7 @@
   function aplicarReajustes(loc, alvoId, precoBase, mes){
     let preco = precoBase;
     (reajustesManuais[loc] || []).forEach(regra => {
+      if(reajusteDesligado(loc, regra)) return;
       if(regra.alvos.includes(alvoId) && mes >= regra.mesInicio){
         preco = preco * (1 + regra.percentual / 100);
       }
@@ -1563,7 +1917,7 @@
 
   function salvarLocalSilencioso(){
     try{
-      const dados = {servicosManuais, eventosManuais, reajustesManuais, capacidades, salvoEm: new Date().toISOString()};
+      const dados = {servicosManuais, eventosManuais, reajustesManuais, ajustesLinhasAuto, reajustesOff, capacidades, salvoEm: new Date().toISOString()};
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dados));
       return true;
     }catch(err){
@@ -1590,6 +1944,10 @@
       if(dados.servicosManuais) servicosManuais = dados.servicosManuais;
       eventosManuais = dados.eventosManuais || {Extrema: [], Navegantes: []};
       reajustesManuais = dados.reajustesManuais || {Extrema: [], Navegantes: []};
+      ajustesLinhasAuto = normalizarAjustesAuto(dados.ajustesLinhasAuto);
+      reajustesOff = normalizarPorLoc(dados.reajustesOff);
+      atribuirRids(reajustesManuais);
+      garantirIdsUnicosServicos();
       if(dados.capacidades) capacidades = dados.capacidades;
       if(dados.salvoEm){
         document.getElementById('salvo-local-status').textContent = 'Último salvo local: ' + new Date(dados.salvoEm).toLocaleString('pt-BR');
@@ -2000,7 +2358,7 @@
   let compararAtivo = false;
   let detalhadoGlobal = null;
   let detalhadoEntradaGlobal = null, detalhadoVendaGlobal = null;
-  const filtros = {localidade:['Extrema','Navegantes'], canal:['Loja','E.Comm','Peças'], blocado:['SIM','NÃO'], producao:[], pd:[], familia:[]};
+  const filtros = {localidade:['Extrema','Navegantes'], canal:['Loja','E.Comm','Peças','B2B'], blocado:['SIM','NÃO'], producao:[], pd:[], familia:[]};
   // mapeia a categoria de canal (rótulo livre de um serviço/evento manual) pro filtro
   // real de canal da sidebar; categorias sem correspondência real (ex: sem categoria)
   // sempre aparecem. Usada tanto no detalhe por categoria (DRE/resumo) quanto no
@@ -2008,7 +2366,8 @@
   function categoriaCanalPassaFiltro(categoriaCanal){
     if(categoriaCanal === 'E.Comm') return filtros.canal.includes('E.Comm');
     if(categoriaCanal === 'Peças') return filtros.canal.includes('Peças');
-    if(categoriaCanal === 'Lojas' || categoriaCanal === 'HA') return filtros.canal.includes('Loja');
+    if(categoriaCanal === 'B2B') return filtros.canal.includes('B2B');
+    if(categoriaCanal === 'Lojas' || categoriaCanal === 'HA' || categoriaCanal === 'Loja/Varejo') return filtros.canal.includes('Loja');
     return true;
   }
   let pdFamiliaMap = {};
@@ -2623,13 +2982,13 @@
         const custoGris = precoGris * valorEstoquePorLoc[loc][m];
         const custoTransferencia = precoTransferencia * (transfM3PorLoc[loc][m] || 0);
 
-        // Expedição: Extrema separa B2B (canal Loja) x B2C (canal E.Comm) com volume real;
+        // Expedição: Extrema separa B2B (canais Loja + B2B) x B2C (canal E.Comm) com volume real;
         // Navegantes não tem essa distinção no arquivo de custos, fica uma linha só.
         let custoExpedicaoB2B = 0, custoExpedicaoB2C = 0, custoExpedicao = 0;
         if(loc === 'Extrema'){
           const precoB2B = aplicarReajustes(loc, 'expedicaoB2B', p.expB2B || 0, m);
           const precoB2C = aplicarReajustes(loc, 'expedicaoB2C', p.expB2C || 0, m);
-          const volB2B = somaFiltradaPorCanal(dVenda.linhas, loc, m, 'm3', 'Loja');
+          const volB2B = somaFiltradaPorCanal(dVenda.linhas, loc, m, 'm3', 'Loja') + somaFiltradaPorCanal(dVenda.linhas, loc, m, 'm3', 'B2B');
           const volB2C = somaFiltradaPorCanal(dVenda.linhas, loc, m, 'm3', 'E.Comm');
           custoExpedicaoB2B = precoB2B * volB2B;
           custoExpedicaoB2C = precoB2C * volB2C;
@@ -2688,7 +3047,7 @@
       }
       return valores;
     }
-    const nomeCanalDisplay = {'Loja':'Loja/Varejo', 'E.Comm':'E.Comm', 'Peças':'Peças'};
+    const nomeCanalDisplay = {'Loja':'Loja/Varejo', 'E.Comm':'E.Comm', 'Peças':'Peças', 'B2B':'B2B'};
     const canaisParaLoc = loc === 'Extrema' ? CANAIS_REAIS : ['Loja','E.Comm'];
 
     const linhas = [];
@@ -2699,16 +3058,19 @@
     });
 
     if(loc === 'Extrema'){
-      const valoresB2B = [], valoresB2C = [];
+      // Expedição B2B (tarifa B2B do arquivo de custos) vale pros canais Loja e B2B —
+      // uma linha por canal, pra cada um aparecer no seu lugar na DRE; a soma é a mesma
+      // usada em computeCustos (Loja + B2B).
+      const valoresB2BLoja = [], valoresB2BCanal = [], valoresB2C = [];
       for(let m = 0; m < 12; m++){
         const precoB2B = aplicarReajustes(loc, 'expedicaoB2B', p.expB2B || 0, m);
         const precoB2C = aplicarReajustes(loc, 'expedicaoB2C', p.expB2C || 0, m);
-        const volB2B = somaFiltradaPorCanal(dVenda.linhas, loc, m, 'm3', 'Loja');
-        const volB2C = somaFiltradaPorCanal(dVenda.linhas, loc, m, 'm3', 'E.Comm');
-        valoresB2B.push(precoB2B * volB2B);
-        valoresB2C.push(precoB2C * volB2C);
+        valoresB2BLoja.push(precoB2B * somaFiltradaPorCanal(dVenda.linhas, loc, m, 'm3', 'Loja'));
+        valoresB2BCanal.push(precoB2B * somaFiltradaPorCanal(dVenda.linhas, loc, m, 'm3', 'B2B'));
+        valoresB2C.push(precoB2C * somaFiltradaPorCanal(dVenda.linhas, loc, m, 'm3', 'E.Comm'));
       }
-      linhas.push({id:'expedicaoB2B', nome:'Expedição B2B', categoriaLinha:'Movimentação', categoriaCanal:'Loja/Varejo', valoresPorMes: valoresB2B});
+      linhas.push({id:'expedicaoB2B', nome:'Expedição B2B', categoriaLinha:'Movimentação', categoriaCanal:'Loja/Varejo', valoresPorMes: valoresB2BLoja});
+      linhas.push({id:'expedicaoB2B', nome:'Expedição B2B', categoriaLinha:'Movimentação', categoriaCanal:'B2B', valoresPorMes: valoresB2BCanal});
       linhas.push({id:'expedicaoB2C', nome:'Expedição B2C', categoriaLinha:'Movimentação', categoriaCanal:'E.Comm', valoresPorMes: valoresB2C});
     } else {
       ['Loja','E.Comm'].forEach(canal => {
@@ -2720,6 +3082,19 @@
       linhas.push({id:'gris', nome:'GRIS', categoriaLinha:'Taxas', categoriaCanal:nomeCanalDisplay[canal], valoresPorMes: valoresParaCanal('gris', p.gris || 0, dGlobal.linhas, 'valorEstoque', canal)});
     });
     linhas.push({id:'transferencia', nome:'Transferência E.Comm', categoriaLinha:'Movimentação', categoriaCanal:'E.Comm', valoresPorMes: valoresPara('transferencia', PRECO_TRANSFERENCIA_ECOMM, transfM3PorLoc[loc])});
+
+    // linhas automáticas: guarda canal original (base física do drill-down e chave do ajuste)
+    // e aplica o canal/categoria editados pelo usuário, se houver.
+    linhas.forEach(l => {
+      l.origem = 'auto';
+      l.canalOriginal = l.categoriaCanal;
+      l.chaveExtra = 'a:' + l.canalOriginal;
+      const aj = (ajustesLinhasAuto[loc] || {})[chaveAjusteAuto(l.id, l.canalOriginal)];
+      if(aj){
+        if(aj.categoriaCanal) l.categoriaCanal = aj.categoriaCanal;
+        if(aj.categoriaLinha) l.categoriaLinha = aj.categoriaLinha;
+      }
+    });
 
     // idxServ vai num campo à parte (chaveExtra), NÃO no "id" — o "id" continua
     // 'servico:'+serv.id puro porque badgeReajuste()/aplicarReajustes() dependem desse
@@ -2737,17 +3112,20 @@
         const quantidade = calcularQuantidadeServico(serv, m, loc, volumes);
         valoresPorMes.push(quantidade * precoServico);
       }
-      linhas.push({id:'servico:' + serv.id, chaveExtra: idxServ, nome: serv.nome, categoriaLinha: serv.categoriaLinha || '(sem categoria)', categoriaCanal: serv.categoriaCanal || '—', valoresPorMes});
+      linhas.push({origem:'servico', servId: serv.id, id:'servico:' + serv.id, chaveExtra: serv.id, nome: serv.nome, categoriaLinha: serv.categoriaLinha || '(sem categoria)', categoriaCanal: serv.categoriaCanal || '—', valoresPorMes});
     });
 
     // mesma lógica pros eventos: dois eventos com nome igual (ex.: "Midea Day" em meses
     // diferentes) não tinham "id" nenhum antes — só o nome — e colidiam na chave() da
     // DRE do mesmo jeito, fazendo um dos dois sumir da tela.
+    const contaEv = {};
     (eventosManuais[loc] || []).forEach((ev, idxEv) => {
+      // chave estável entre versões de custos: nome|mês|n-ésimo igual (e não a posição na lista)
+      const kEv = ev.nome + '|' + ev.mes; contaEv[kEv] = (contaEv[kEv] || 0) + 1;
       if(!categoriaCanalPassaFiltro(ev.categoriaCanal)) return;
       const valoresPorMes = Array(12).fill(0);
       valoresPorMes[ev.mes] = ev.valor;
-      linhas.push({chaveExtra: idxEv, nome: ev.nome, categoriaLinha: 'Eventos', categoriaCanal: ev.categoriaCanal || '—', valoresPorMes});
+      linhas.push({origem:'evento', evIdx: idxEv, chaveExtra: kEv + '|' + contaEv[kEv], nome: ev.nome, categoriaLinha: ev.categoriaLinha || 'Eventos', categoriaCanal: ev.categoriaCanal || '—', valoresPorMes});
     });
 
     return linhas;
@@ -2755,11 +3133,43 @@
 
   function badgeReajuste(loc, alvoId){
     if(!alvoId) return '';
-    const regras = (reajustesManuais[loc] || []).filter(r => r.alvos.includes(alvoId));
+    const regras = (reajustesManuais[loc] || []).filter(r => r.alvos.includes(alvoId) && !reajusteDesligado(loc, r));
     if(regras.length === 0) return '';
     return regras.map(r =>
-      ' <span style="display:inline-block; background:#fff3cd; color:#8a5a0a; font-size:10px; padding:1px 6px; border-radius:10px; margin-left:4px; white-space:nowrap;">+' + r.percentual + '% desde ' + MESES[r.mesInicio] + '</span>'
+      ' <span title="' + String(r.comentario || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;') + '" style="display:inline-block; background:#fff3cd; color:#8a5a0a; font-size:10px; padding:1px 6px; border-radius:10px; margin-left:4px; white-space:nowrap;">+' + r.percentual + '% desde ' + MESES[r.mesInicio] + (r.comentario ? ' · ' + String(r.comentario).replace(/&/g,'&amp;').replace(/</g,'&lt;') : '') + '</span>'
     ).join('');
+  }
+
+  function opcoesCanalEditavel(atual){
+    const lista = [...CANAIS_AUTO_ROTULOS];
+    CANAIS_SERVICO.forEach(c => { if(!lista.includes(c)) lista.push(c); });
+    if(atual && atual !== '—' && !lista.includes(atual)) lista.push(atual);
+    return opcoesSelect(lista, atual === '—' ? '' : atual, false);
+  }
+  function opcoesCategoriaEditavel(atual){
+    const lista = [...LINHAS_SERVICO];
+    if(atual && atual !== '(sem categoria)' && !lista.includes(atual)) lista.push(atual);
+    return opcoesSelect(lista, atual === '(sem categoria)' ? '' : atual, true);
+  }
+  const ESTILO_SEL_DET = 'font-size:12px; padding:3px; border-radius:6px; border:1px solid var(--border); max-width:130px;';
+
+  // grava canal/categoria editados conforme a origem da linha (automática, serviço ou evento)
+  function editarCanalCategoriaLinha(loc, origem, ref, campo, valor){
+    if(origem === 'servico'){
+      atualizarServico(loc, ref, {[campo]: valor});
+    } else if(origem === 'evento'){
+      const ev = (eventosManuais[loc] || [])[Number(ref)];
+      if(ev) ev[campo] = valor;
+    } else {
+      if(!ajustesLinhasAuto[loc]) ajustesLinhasAuto[loc] = {};
+      const aj = ajustesLinhasAuto[loc][ref] || (ajustesLinhasAuto[loc][ref] = {});
+      aj[campo] = valor;
+      if(!aj.categoriaCanal && !aj.categoriaLinha) delete ajustesLinhasAuto[loc][ref];
+    }
+    salvarLocalSilencioso();
+    renderCustos();
+    if(origem === 'servico') renderOutrosServicosUI(loc);
+    if(origem === 'evento') renderEventosUI(loc);
   }
 
   function renderDetalheServicosUI(loc){
@@ -2782,10 +3192,31 @@
         celulas.push('<td>' + formatR$(d.valoresPorMes[m]) + '</td>');
         total += d.valoresPorMes[m];
       }
+      const ref = d.origem === 'servico' ? d.servId : (d.origem === 'evento' ? d.evIdx : chaveAjusteAuto(d.id, d.canalOriginal));
+      const refAttr = String(ref).replace(/"/g, '&quot;');
+      const selCanal = '<select class="sel-det-canal" data-origem="' + d.origem + '" data-ref="' + refAttr + '" style="' + ESTILO_SEL_DET + '">' + opcoesCanalEditavel(d.categoriaCanal) + '</select>';
+      const selCat = '<select class="sel-det-cat" data-origem="' + d.origem + '" data-ref="' + refAttr + '" style="' + ESTILO_SEL_DET + '">' + opcoesCategoriaEditavel(d.categoriaLinha) + '</select>';
       const tr = document.createElement('tr');
-      tr.innerHTML = '<td>' + d.nome + badgeReajuste(loc, d.id) + '</td><td>' + (d.categoriaCanal || '—') + '</td><td>' + d.categoriaLinha + '</td>' + celulas.join('') + '<td style="font-weight:600;">' + formatR$(total) + '</td>';
+      tr.innerHTML = '<td>' + d.nome + badgeReajuste(loc, d.id) + '</td><td>' + selCanal + '</td><td>' + selCat + '</td>' + celulas.join('') + '<td style="font-weight:600;">' + formatR$(total) + '</td>';
       tbody.appendChild(tr);
     });
+    tbody.querySelectorAll('.sel-det-canal').forEach(el => el.addEventListener('change', e => {
+      editarCanalCategoriaLinha(loc, e.target.dataset.origem, e.target.dataset.ref, 'categoriaCanal', e.target.value);
+    }));
+    tbody.querySelectorAll('.sel-det-cat').forEach(el => el.addEventListener('change', e => {
+      const t = e.target;
+      if(t.value === '__novo__'){
+        const nova = prompt('Nome da nova categoria de linha de serviço:');
+        if(nova && nova.trim()){
+          LINHAS_SERVICO.push(nova.trim());
+          editarCanalCategoriaLinha(loc, t.dataset.origem, t.dataset.ref, 'categoriaLinha', nova.trim());
+        } else {
+          renderDetalheServicosUI(loc);
+        }
+      } else {
+        editarCanalCategoriaLinha(loc, t.dataset.origem, t.dataset.ref, 'categoriaLinha', t.value);
+      }
+    }));
   }
 
   const chartsResumoPorCd = {Extrema: null, Navegantes: null};
@@ -3173,26 +3604,43 @@
   }
 
   let comparativoCustosIdx = {
-    Extrema: {a: -1, b: -1},
-    Navegantes: {a: -1, b: -1}
+    Extrema: {a: -1, b: -1, ca: -1, cb: -1, offA: null, offB: null, tocado: false},
+    Navegantes: {a: -1, b: -1, ca: -1, cb: -1, offA: null, offB: null, tocado: false}
   };
 
   function preencherSelectsComparativoCustos(loc){
     const selA = document.getElementById('select-comparativo-custos-a-' + loc);
     const selB = document.getElementById('select-comparativo-custos-b-' + loc);
     if(!selA || !selB) return;
+    const estiloSel = 'font-size:13px; padding:5px 8px; border-radius:var(--radius); border:1px solid var(--border);';
+    if(!document.getElementById('select-comparativo-custos-ca-' + loc)){
+      selA.insertAdjacentHTML('afterend', '<label style="font-size:13px; color:var(--text2);">Custos A:</label><select id="select-comparativo-custos-ca-' + loc + '" style="' + estiloSel + '"></select><span id="slot-reaj-a-' + loc + '"></span>');
+      selB.insertAdjacentHTML('afterend', '<label style="font-size:13px; color:var(--text2);">Custos B:</label><select id="select-comparativo-custos-cb-' + loc + '" style="' + estiloSel + '"></select><span id="slot-reaj-b-' + loc + '"></span>');
+    }
+    const selCA = document.getElementById('select-comparativo-custos-ca-' + loc);
+    const selCB = document.getElementById('select-comparativo-custos-cb-' + loc);
     const idx = comparativoCustosIdx[loc];
-    if(idx.a < 0 || idx.a >= versoesFlow.length) idx.a = versoesFlow.length - 2;
-    if(idx.b < 0 || idx.b >= versoesFlow.length) idx.b = versoesFlow.length - 1;
+    const nF = versoesFlow.length, nC = versoesCustos.length;
+    if(idx.a < 0 || idx.a >= nF) idx.a = Math.max(0, nF - 2);
+    if(idx.b < 0 || idx.b >= nF) idx.b = nF - 1;
+    if(idx.ca < 0 || idx.ca >= nC) idx.ca = custosIdxDe(versoesFlow[idx.a]);
+    if(idx.cb < 0 || idx.cb >= nC) idx.cb = custosIdxDe(versoesFlow[idx.b]);
+    // mesmo flow nos dois lados e mesmo custo: sugere os dois últimos custos (compara só a mudança de custos)
+    if(!idx.tocado && idx.a === idx.b && idx.ca === idx.cb && nC > 1){ idx.ca = nC - 2; idx.cb = nC - 1; }
     const opcoes = versoesFlow.map((v, i) => '<option value="' + i + '">' + v.nome + '</option>').join('');
-    selA.innerHTML = opcoes;
-    selB.innerHTML = opcoes;
-    selA.value = idx.a;
-    selB.value = idx.b;
+    const opcoesC = versoesCustos.map((v, i) => '<option value="' + i + '">' + nomeVersaoCustos(i) + '</option>').join('');
+    selA.innerHTML = opcoes; selB.innerHTML = opcoes;
+    selCA.innerHTML = opcoesC; selCB.innerHTML = opcoesC;
+    selA.value = idx.a; selB.value = idx.b; selCA.value = idx.ca; selCB.value = idx.cb;
+    document.getElementById('slot-reaj-a-' + loc).innerHTML = htmlFlagsReajustes(idx.ca, offEfetivo(idx.offA, idx.ca, loc), {loc, ctx: 'cmpA'});
+    document.getElementById('slot-reaj-b-' + loc).innerHTML = htmlFlagsReajustes(idx.cb, offEfetivo(idx.offB, idx.cb, loc), {loc, ctx: 'cmpB'});
+    ligarFlagsReajustes();
     if(!selA.dataset.wired){
       selA.dataset.wired = '1';
-      selA.addEventListener('change', () => { idx.a = Number(selA.value); renderComparativoCustosVersoes(loc); });
-      selB.addEventListener('change', () => { idx.b = Number(selB.value); renderComparativoCustosVersoes(loc); });
+      selA.addEventListener('change', () => { idx.a = Number(selA.value); idx.ca = custosIdxDe(versoesFlow[idx.a]); idx.offA = null; idx.tocado = true; renderComparativoCustosVersoes(loc); });
+      selB.addEventListener('change', () => { idx.b = Number(selB.value); idx.cb = custosIdxDe(versoesFlow[idx.b]); idx.offB = null; idx.tocado = true; renderComparativoCustosVersoes(loc); });
+      selCA.addEventListener('change', () => { idx.ca = Number(selCA.value); idx.offA = null; idx.tocado = true; renderComparativoCustosVersoes(loc); });
+      selCB.addEventListener('change', () => { idx.cb = Number(selCB.value); idx.offB = null; idx.tocado = true; renderComparativoCustosVersoes(loc); });
     }
   }
 
@@ -3201,22 +3649,24 @@
     locs.forEach(loc => {
       const secao = document.getElementById('secao-comparativo-custos-' + loc);
       if(!secao) return;
-      if(versoesFlow.length < 2 || !custosParsed){ secao.style.display = 'none'; return; }
+      if((versoesFlow.length < 2 && versoesCustos.length < 2) || !custosParsed){ secao.style.display = 'none'; return; }
       secao.style.display = 'block';
       preencherSelectsComparativoCustos(loc);
 
       const idx = comparativoCustosIdx[loc];
       const versaoA = versoesFlow[idx.a];
       const versaoB = versoesFlow[idx.b];
-      const resA = computeCustos(versaoA.fontes);
-      const resB = computeCustos(versaoB.fontes);
+      const offA = offEfetivo(idx.offA, idx.ca, loc), offB = offEfetivo(idx.offB, idx.cb, loc);
+      const nomeA = rotuloComCustos(versaoA, idx.ca) + sufixoReajustes(idx.ca, offA, loc), nomeB = rotuloComCustos(versaoB, idx.cb) + sufixoReajustes(idx.cb, offB, loc);
+      const resA = comCustosVersao(idx.ca, () => computeCustos(versaoA.fontes), loc, offA);
+      const resB = comCustosVersao(idx.cb, () => computeCustos(versaoB.fontes), loc, offB);
       if(!resA || !resB) return;
 
       const linhasA = resA.linhasCusto.filter(l => l.loc === loc);
       const linhasB = resB.linhasCusto.filter(l => l.loc === loc);
       const thead = document.querySelector('#tabela-comparativo-custos-' + loc + ' thead');
       const tbody = document.querySelector('#tabela-comparativo-custos-' + loc + ' tbody');
-      thead.innerHTML = '<tr><th>Mês</th><th>' + versaoA.nome + '</th><th>' + versaoB.nome + '</th><th>Δ (B − A)</th></tr>';
+      thead.innerHTML = '<tr><th>Mês</th><th>' + nomeA + '</th><th>' + nomeB + '</th><th>Δ (B − A)</th></tr>';
       tbody.innerHTML = '';
       for(let m = periodoDe; m <= periodoAte; m++){
         const vA = (linhasA.find(l => l.mes === m) || {}).totalCobrado || 0;
@@ -3229,17 +3679,17 @@
         tbody.appendChild(tr);
       }
 
-      renderComparativoCustosDetalhe(loc, versaoA, versaoB);
+      renderComparativoCustosDetalhe(loc, versaoA, versaoB, idx.ca, idx.cb, offA, offB, nomeA, nomeB);
     });
   }
 
-  function renderComparativoCustosDetalhe(loc, versaoA, versaoB){
+  function renderComparativoCustosDetalhe(loc, versaoA, versaoB, ca, cb, offA, offB, nomeA, nomeB){
     const thead = document.querySelector('#tabela-comparativo-custos-detalhe-' + loc + ' thead');
     const tbody = document.querySelector('#tabela-comparativo-custos-detalhe-' + loc + ' tbody');
     if(!thead || !tbody) return;
 
-    const detA = computeDetalheCompleto(loc, versaoA.fontes);
-    const detB = computeDetalheCompleto(loc, versaoB.fontes);
+    const detA = comCustosVersao(ca, () => computeDetalheCompleto(loc, versaoA.fontes), loc, offA);
+    const detB = comCustosVersao(cb, () => computeDetalheCompleto(loc, versaoB.fontes), loc, offB);
 
     function totalPeriodo(linha){
       let t = 0;
@@ -3265,7 +3715,7 @@
     });
     linhasDiff.sort((x, y) => Math.abs(y.delta) - Math.abs(x.delta));
 
-    thead.innerHTML = '<tr><th>Cobrança</th><th>Canal</th><th>Categoria</th><th>' + versaoA.nome + '</th><th>' + versaoB.nome + '</th><th>Δ (B − A)</th></tr>';
+    thead.innerHTML = '<tr><th>Cobrança</th><th>Canal</th><th>Categoria</th><th>' + nomeA + '</th><th>' + nomeB + '</th><th>Δ (B − A)</th></tr>';
     tbody.innerHTML = linhasDiff.length
       ? linhasDiff.map(l => {
           const corDelta = l.delta >= 0 ? '#c0392b' : '#0f6e56';
@@ -3285,12 +3735,38 @@
   // (a causa física) explicam aquela variação de R$.
   // ------------------------------------------------------------------
   const ORDEM_CATEGORIAS_DRE = ['Armazenagem','Movimentação','Taxas','Pessoas','Serviços','Eventos'];
-  const CANAL_REAL_POR_DISPLAY_DRE = {'Loja/Varejo':'Loja', 'E.Comm':'E.Comm', 'Peças':'Peças'};
+  const CANAL_REAL_POR_DISPLAY_DRE = {'Loja/Varejo':'Loja', 'E.Comm':'E.Comm', 'Peças':'Peças', 'B2B':'B2B'};
   const DRE_MAX_VERSOES = 3;
   let dreVersaoIdx = {
-    Extrema: {ids: [-1, -1]},
-    Navegantes: {ids: [-1, -1]}
+    Extrema: {ids: [-1, -1], custos: [], off: [], tocado: false},
+    Navegantes: {ids: [-1, -1], custos: [], off: [], tocado: false}
   };
+  // garante uma versão de custos válida por coluna da DRE (padrão: a de origem do flow escolhido)
+  function normalizarDreCustos(idxObj){
+    const nC = versoesCustos.length;
+    if(!Array.isArray(idxObj.custos)) idxObj.custos = [];
+    idxObj.custos = idxObj.ids.map((fi, slot) => {
+      const c = idxObj.custos[slot];
+      return (Number.isInteger(c) && c >= 0 && c < nC) ? c : custosIdxDe(versoesFlow[fi]);
+    });
+    if(!Array.isArray(idxObj.off)) idxObj.off = [];
+    idxObj.off = idxObj.ids.map((_, s) => Array.isArray(idxObj.off[s]) ? idxObj.off[s] : null);
+    const mesmoFlow = idxObj.ids.every(i => i === idxObj.ids[0]);
+    const mesmoCusto = idxObj.custos.every(c => c === idxObj.custos[0]);
+    if(!idxObj.tocado && mesmoFlow && mesmoCusto && nC > 1){
+      idxObj.custos = idxObj.ids.map((_, s) => Math.max(0, nC - idxObj.ids.length + s));
+    }
+  }
+  // colunas da DRE já com o rótulo "flow · nome dos custos" e a versão de custos de cada uma
+  function versoesComparadasDRE(loc){
+    const idxObj = dreVersaoIdx[loc];
+    normalizarDreCustos(idxObj);
+    return idxObj.ids.map((i, slot) => {
+      const ci = idxObj.custos[slot];
+      const off = offEfetivo(idxObj.off[slot], ci, loc);
+      return {...versoesFlow[i], nome: rotuloComCustos(versoesFlow[i], ci) + sufixoReajustes(ci, off, loc), custosIdx: ci, offLoc: off};
+    });
+  }
   const dreColapsados = {Extrema: new Set(), Navegantes: new Set()};
   const dreDrillAbertos = {Extrema: new Set(), Navegantes: new Set()};
   let dreGruposConhecidos = {Extrema: [], Navegantes: []};
@@ -3321,19 +3797,40 @@
     if(idxObj.ids.length < 2 || idxObj.ids.some(i => i === null)){
       idxObj.ids = [Math.max(0, versoesFlow.length - 2), versoesFlow.length - 1];
     }
+    normalizarDreCustos(idxObj);
     const opcoes = versoesFlow.map((v, i) => '<option value="' + i + '">' + v.nome + '</option>').join('');
+    const opcoesC = versoesCustos.map((v, i) => '<option value="' + i + '">' + nomeVersaoCustos(i) + '</option>').join('');
     lista.innerHTML = idxObj.ids.map((valorSel, slot) => {
       const podeRemover = idxObj.ids.length > 2;
       return '<span style="display:flex; align-items:center; gap:4px;">' +
         '<label style="font-size:13px; color:var(--text2);">V' + (slot + 1) + ':</label>' +
         '<select data-slot="' + slot + '" style="font-size:13px; padding:5px 8px; border-radius:var(--radius); border:1px solid var(--border);">' + opcoes + '</select>' +
+        '<select data-cslot="' + slot + '" title="Versão de custos" style="font-size:13px; padding:5px 8px; border-radius:var(--radius); border:1px solid var(--border);">' + opcoesC + '</select>' +
+        '<span data-reajslot="' + slot + '"></span>' +
         (podeRemover ? '<span class="dre-toggle" title="Remover essa versão da comparação" onclick="window.__dreRemoverVersao(\'' + loc + '\',' + slot + ')" style="color:#c0392b; width:auto;">✕</span>' : '') +
         '</span>';
     }).join('');
-    lista.querySelectorAll('select').forEach((sel, slot) => {
+    lista.querySelectorAll('select[data-slot]').forEach(sel => {
+      const slot = Number(sel.dataset.slot);
       sel.value = idxObj.ids[slot];
-      sel.addEventListener('change', () => { idxObj.ids[slot] = Number(sel.value); renderDRE(loc); });
+      sel.addEventListener('change', () => {
+        idxObj.ids[slot] = Number(sel.value);
+        idxObj.custos[slot] = custosIdxDe(versoesFlow[idxObj.ids[slot]]);
+        idxObj.off[slot] = null;
+        idxObj.tocado = true;
+        renderDRE(loc);
+      });
     });
+    lista.querySelectorAll('select[data-cslot]').forEach(sel => {
+      const slot = Number(sel.dataset.cslot);
+      sel.value = idxObj.custos[slot];
+      sel.addEventListener('change', () => { idxObj.custos[slot] = Number(sel.value); idxObj.off[slot] = null; idxObj.tocado = true; renderDRE(loc); });
+    });
+    lista.querySelectorAll('[data-reajslot]').forEach(span => {
+      const slot = Number(span.dataset.reajslot);
+      span.innerHTML = htmlFlagsReajustes(idxObj.custos[slot], offEfetivo(idxObj.off[slot], idxObj.custos[slot], loc), {loc, ctx: 'dre' + slot});
+    });
+    ligarFlagsReajustes();
     if(btnAdd) btnAdd.style.display = (idxObj.ids.length < DRE_MAX_VERSOES && idxObj.ids.length < versoesFlow.length) ? '' : 'none';
 
     const selTipo = document.getElementById('dre-limiar-tipo-' + loc);
@@ -3354,12 +3851,17 @@
     let candidato = versoesFlow.length - 1;
     for(let i = versoesFlow.length - 1; i >= 0; i--){ if(!usados.has(i)){ candidato = i; break; } }
     idxObj.ids.push(candidato);
+    idxObj.custos.push(custosIdxDe(versoesFlow[candidato]));
+    idxObj.off.push(null);
+    idxObj.tocado = true;
     renderDRE(loc);
   }
   function dreRemoverVersao(loc, slot){
     const idxObj = dreVersaoIdx[loc];
     if(idxObj.ids.length <= 2) return;
     idxObj.ids.splice(slot, 1);
+    idxObj.custos.splice(slot, 1);
+    idxObj.off.splice(slot, 1);
     renderDRE(loc);
   }
   window.__dreAdicionarVersao = dreAdicionarVersao;
@@ -3435,7 +3937,7 @@
     if(id === 'pp') return {kind:'global', field:'pp', canal:canalReal, blocado:'NÃO'};
     if(id === 'bloco') return {kind:'global', field:'m3', canal:canalReal, blocado:'SIM'};
     if(id === 'recebimento') return {kind:'entrada', field:'m3', canal:canalReal};
-    if(id === 'expedicaoB2B') return {kind:'venda', field:'m3', canal:'Loja'};
+    if(id === 'expedicaoB2B') return {kind:'venda', field:'m3', canal:canalReal || 'Loja'};
     if(id === 'expedicaoB2C') return {kind:'venda', field:'m3', canal:'E.Comm'};
     if(id === 'expedicao') return {kind:'venda', field:'m3', canal:canalReal};
     if(id === 'adValorem' || id === 'gris') return {kind:'global', field:'valorEstoque', canal:canalReal};
@@ -3489,12 +3991,13 @@
   // por PD + Família — cada grupo aparece com sua fatia exata do Δ total,
   // e também com o volume físico (quantidade + unidade) que gerou essa fatia.
   function drilldownFisicoDRE(loc, id, canalDisplay, versaoA, versaoB){
-    const basis = basisDaLinhaDRE(loc, id, canalDisplay);
+    const basis = comCustosVersao(versaoB.custosIdx, () => basisDaLinhaDRE(loc, id, canalDisplay), loc, versaoB.offLoc);
     if(!basis) return null;
     const operacaoBasis = basis.kind === 'entrada' ? 'ENTRADA' : (basis.kind === 'venda' ? 'VENDA' : operacaoAtual);
     const dA = computeDetalhado(versaoA.fontes, cubResultadoGlobal, operacaoBasis);
     const dB = computeDetalhado(versaoB.fontes, cubResultadoGlobal, operacaoBasis);
-    const precos = precoPorMesDaLinhaDRE(loc, id);
+    const precosA = comCustosVersao(versaoA.custosIdx, () => precoPorMesDaLinhaDRE(loc, id), loc, versaoA.offLoc);
+    const precosB = comCustosVersao(versaoB.custosIdx, () => precoPorMesDaLinhaDRE(loc, id), loc, versaoB.offLoc);
     const unidade = unidadeDoBasis(basis.field);
 
     function agrupar(linhas){
@@ -3517,7 +4020,7 @@
       const porMesA = [], porMesB = [];
       for(let m = periodoDe; m <= periodoAte; m++){
         const pA = (gA[k] || Array(12).fill(0))[m], pB = (gB[k] || Array(12).fill(0))[m];
-        delta += (pB - pA) * precos[m];
+        delta += pB * precosB[m] - pA * precosA[m];
         physA += pA; physB += pB;
         porMesA.push(pA); porMesB.push(pB);
       }
@@ -3535,7 +4038,7 @@
       if(!table) return;
       const thead = table.querySelector('thead');
       const tbody = table.querySelector('tbody');
-      if(versoesFlow.length < 2 || !custosParsed){
+      if((versoesFlow.length < 2 && versoesCustos.length < 2) || !custosParsed){
         thead.innerHTML = '';
         tbody.innerHTML = '<tr><td>Carregue pelo menos duas versões do BP27 pra comparar o DRE.</td></tr>';
         return;
@@ -3547,10 +4050,11 @@
       // alerta/destaque e a "causa física" olham só pro ÚLTIMO par (a comparação mais
       // recente); os Top Drivers olham pra ponta a ponta (1ª vs última versão).
       const idxObj = dreVersaoIdx[loc];
-      const versoesComparadas = idxObj.ids.map(i => versoesFlow[i]);
+      const versoesComparadas = versoesComparadasDRE(loc);
       const nV = versoesComparadas.length;
-      const detsPorVersao = versoesComparadas.map(v => computeDetalheCompleto(loc, v.fontes));
-      const ressPorVersao = versoesComparadas.map(v => computeCustos(v.fontes));
+      const detsPorVersao = versoesComparadas.map(v => comCustosVersao(v.custosIdx, () => computeDetalheCompleto(loc, v.fontes), loc, v.offLoc));
+      const ressPorVersao = versoesComparadas.map(v => comCustosVersao(v.custosIdx, () => computeCustos(v.fontes), loc, v.offLoc));
+      const basisUlt = (id, canal) => comCustosVersao(versoesComparadas[nV - 1].custosIdx, () => basisDaLinhaDRE(loc, id, canal), loc, versoesComparadas[nV - 1].offLoc);
       const mesesPeriodo = mesesDoPeriodo();
 
       function totalPeriodo(valoresPorMes){
@@ -3590,7 +4094,7 @@
         const g = grupos[categoria];
         if(!g.canais[canalDisplay]) g.canais[canalDisplay] = {linhas: [], totaisPorVersao: Array.from({length: nV}, () => Array(12).fill(0))};
         const c = g.canais[canalDisplay];
-        c.linhas.push({id: base.id, nome: base.nome, valoresPorVersao});
+        c.linhas.push({id: base.id, nome: base.nome, canalOrig: base.canalOriginal, valoresPorVersao});
         for(let m = 0; m < 12; m++){ for(let v = 0; v < nV; v++){ c.totaisPorVersao[v][m] += valoresPorVersao[v][m]; g.totaisPorVersao[v][m] += valoresPorVersao[v][m]; } }
       });
 
@@ -3713,7 +4217,7 @@
             const celulasMesLin = [];
             for(let m = periodoDe; m <= periodoAte; m++) celulasMesLin.push(blocosParesMes(l.valoresPorVersao, c.totaisPorVersao, m));
             const oculta = catColapsada || canColapsada;
-            const basis = basisDaLinhaDRE(loc, l.id, canalNome);
+            const basis = basisUlt(l.id, l.canalOrig || canalNome);
             const lineKey = catId + '|lin|' + canIdx + '|' + l.id;
             const temDrill = basis && Math.abs(linTotalUltB - linTotalUltA) >= 0.01;
             const drillAberto = dreDrillAbertos[loc].has(lineKey);
@@ -3724,7 +4228,7 @@
               celulasMesLin.join('') + blocosParesTotal(linTotaisPeriodo, canTotaisPeriodo) + '</tr>';
 
             if(temDrill && drillAberto){
-              const drill = drilldownFisicoDRE(loc, l.id, canalNome, versoesComparadas[nV - 2], versoesComparadas[nV - 1]);
+              const drill = drilldownFisicoDRE(loc, l.id, l.canalOrig || canalNome, versoesComparadas[nV - 2], versoesComparadas[nV - 1]);
               if(drill && drill.length){
                 drill.forEach(d => {
                   const sinal = d.deltaFisico > 0 ? '+' : '';
@@ -3782,14 +4286,15 @@
 
   async function exportarDREExcel(loc){
     if(typeof ExcelJS === 'undefined'){ alert('A biblioteca de exportação não carregou (verifique sua conexão) — recarregue a página e tente de novo.'); return; }
-    if(versoesFlow.length < 2 || !custosParsed){ alert('Carregue pelo menos duas versões do BP27 antes de exportar o DRE.'); return; }
+    if((versoesFlow.length < 2 && versoesCustos.length < 2) || !custosParsed){ alert('Carregue pelo menos duas versões do BP27 (ou de custos) antes de exportar o DRE.'); return; }
 
     // espelha o mesmo suporte a 2 ou 3 versões (pares consecutivos) do simulador.
     const idxObj = dreVersaoIdx[loc];
-    const versoesComparadas = idxObj.ids.map(i => versoesFlow[i]);
+    const versoesComparadas = versoesComparadasDRE(loc);
     const nV = versoesComparadas.length;
-    const detsPorVersao = versoesComparadas.map(v => computeDetalheCompleto(loc, v.fontes));
-    const ressPorVersao = versoesComparadas.map(v => computeCustos(v.fontes));
+    const detsPorVersao = versoesComparadas.map(v => comCustosVersao(v.custosIdx, () => computeDetalheCompleto(loc, v.fontes), loc, v.offLoc));
+    const ressPorVersao = versoesComparadas.map(v => comCustosVersao(v.custosIdx, () => computeCustos(v.fontes), loc, v.offLoc));
+    const basisUlt = (id, canal) => comCustosVersao(versoesComparadas[nV - 1].custosIdx, () => basisDaLinhaDRE(loc, id, canal), loc, versoesComparadas[nV - 1].offLoc);
     const mesesPeriodo = mesesDoPeriodo();
 
     function totalPeriodo(valoresPorMes){ let t = 0; for(let m = periodoDe; m <= periodoAte; m++) t += valoresPorMes[m]; return t; }
@@ -3810,7 +4315,7 @@
       const g = grupos[categoria];
       if(!g.canais[canalDisplay]) g.canais[canalDisplay] = {linhas: [], totaisPorVersao: Array.from({length: nV}, () => Array(12).fill(0))};
       const c = g.canais[canalDisplay];
-      c.linhas.push({id: base.id, nome: base.nome, valoresPorVersao});
+      c.linhas.push({id: base.id, nome: base.nome, canalOrig: base.canalOriginal, valoresPorVersao});
       for(let m = 0; m < 12; m++){ for(let v = 0; v < nV; v++){ c.totaisPorVersao[v][m] += valoresPorVersao[v][m]; g.totaisPorVersao[v][m] += valoresPorVersao[v][m]; } }
     });
 
@@ -3954,9 +4459,9 @@
           const blocosLin = blocosNivelExp(l.valoresPorVersao, c.totaisPorVersao);
           aplicarLinha((ehRelevanteDRE(linTotalUltA, linTotalUltB, loc) ? '⚠️ ' : '') + l.nome, blocosLin, 2, {});
 
-          const basis = basisDaLinhaDRE(loc, l.id, canalNome);
+          const basis = basisUlt(l.id, l.canalOrig || canalNome);
           if(basis && Math.abs(linTotalUltB - linTotalUltA) >= 0.01){
-            const drill = drilldownFisicoDRE(loc, l.id, canalNome, versoesComparadas[nV - 2], versoesComparadas[nV - 1]);
+            const drill = drilldownFisicoDRE(loc, l.id, l.canalOrig || canalNome, versoesComparadas[nV - 2], versoesComparadas[nV - 1]);
             if(drill && drill.length){
               drill.forEach(d => {
                 // meses mostram o volume físico (não R$) por versão, só no ÚLTIMO par (os pares
@@ -4083,7 +4588,12 @@
   }
 
   function aplicarDadosCompartilhados(dados){
-    versoesFlow = dados.versoesFlow || [];
+    // O Firebase descarta listas vazias: uma fonte sem registros (ex.: aba ausente no arquivo)
+    // volta como undefined. Normaliza pra não quebrar o processamento.
+    versoesFlow = (dados.versoesFlow || []).map(v => ({
+      ...v,
+      fontes: (v.fontes || []).map(f => ({...f, regs: f.regs || []}))
+    }));
     versaoAtivaIndex = versoesFlow.length - 1;
     renderVersoesUI();
     cubResultadoGlobal = listaParaCubagemMap(dados.cubResultadoGlobal);
@@ -4092,6 +4602,27 @@
     servicosManuais = dados.servicosManuais || {Extrema: [], Navegantes: []};
     eventosManuais = dados.eventosManuais || {Extrema: [], Navegantes: []};
     reajustesManuais = dados.reajustesManuais || {Extrema: [], Navegantes: []};
+    ['Extrema','Navegantes'].forEach(l => { reajustesManuais[l] = (reajustesManuais[l] || []).map(r => ({...r, alvos: r.alvos || []})); });
+    garantirIdsUnicosServicos();
+    ajustesLinhasAuto = normalizarAjustesAuto(dados.ajustesLinhasAuto);
+    reajustesOff = normalizarPorLoc(dados.reajustesOff);
+    atribuirRids(reajustesManuais);
+    // versões de custos: dados antigos (sem versoesCustos) viram a versão única C1
+    const listaVC = Array.isArray(dados.versoesCustos) ? dados.versoesCustos : Object.values(dados.versoesCustos || {});
+    if(listaVC.length){
+      versoesCustos = listaVC;
+      custosAtivoIdx = (Number.isInteger(dados.custosAtivoIdx) && dados.custosAtivoIdx >= 0 && dados.custosAtivoIdx < listaVC.length) ? dados.custosAtivoIdx : listaVC.length - 1;
+      aplicarEstadoCustos(versoesCustos[custosAtivoIdx]);
+      garantirIdsUnicosServicos();
+      sincronizarCustosAtivo();
+    } else if(custosParsed){
+      versoesCustos = [{nome: 'Custos (versão única)'}];
+      custosAtivoIdx = 0;
+      sincronizarCustosAtivo();
+    } else {
+      versoesCustos = []; custosAtivoIdx = -1;
+    }
+    renderSeletorCustos();
     capacidades = dados.capacidades || {Extrema: {m2:0,m2Cntr:0,m3:0,pp:0,containers:0}, Navegantes: {m2:0,m2Cntr:0,m3:0,pp:0,containers:0}};
     renderCapacidadesUI();
     if(custosParsed){
@@ -4133,13 +4664,18 @@
   }
 
   function serializarEstadoAtual(){
+    sincronizarCustosAtivo();
     return {
       versoesFlow,
+      versoesCustos,
+      custosAtivoIdx,
       cubResultadoGlobal: cubagemMapParaLista(cubResultadoGlobal),
       custosParsed,
       servicosManuais,
       eventosManuais,
       reajustesManuais,
+      ajustesLinhasAuto,
+      reajustesOff,
       capacidades,
       nomesArquivos: versoesFlow.map(v => v.nome),
       atualizadoEm: new Date().toISOString(),
